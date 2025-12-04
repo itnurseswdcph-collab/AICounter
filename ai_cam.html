@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Camera System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <style>
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            text-align: center; 
+            background: transparent; /* พื้นหลังใสเพื่อให้กลมกลืน */
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; /* ซ่อน Scrollbar ของ iframe */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        #loading { margin-top: 20px; font-weight: bold; color: #00566B; }
+
+        /* คอนเทนเนอร์วิดีโอ */
+        #canvas-container { 
+            position: relative; 
+            width: 95%;
+            max-width: 640px;
+            height: auto;
+            margin: 10px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: #000;
+        }
+        
+        video { display: none; }
+        canvas { display: block; width: 100%; height: auto; }
+
+        .status-box {
+            background: rgba(255,255,255,0.9);
+            padding: 10px 20px;
+            border-radius: 30px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: #00566B;
+            font-size: 1.1rem;
+        }
+        
+        #countDisplay { font-size: 1.5rem; font-weight: bold; color: #E74C3C; }
+
+        /* ปุ่มกด */
+        .btn-group { margin-top: 5px; }
+        button { 
+            padding: 10px 20px; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 50px; 
+            margin: 5px; 
+            color: white; 
+            font-weight: bold; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+        .btn-start { background: #27ae60; }
+        .btn-start:hover { background: #219150; }
+        .btn-stop { background: #c0392b; }
+        .btn-stop:hover { background: #a93226; }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+        /* Log ซ่อนไว้เล็กๆ ด้านล่าง */
+        .log { 
+            height: 60px; 
+            width: 90%; 
+            overflow-y: scroll; 
+            border: 1px solid #ddd; 
+            background: rgba(255,255,255,0.8); 
+            font-size: 0.8em; 
+            text-align: left; 
+            padding: 5px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">⏳ กำลังโหลด AI Model... (กรุณารอสักครู่)</div>
+    
+    <div id="canvas-container">
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="status-box">
+        นับล่าสุด: <span id="countDisplay">0</span> คน 
+        <small>(ข้ามเส้น)</small>
+    </div>
+
+    <div class="btn-group">
+        <button id="btnStart" class="btn-start" onclick="startCamera()">🔴 เริ่มกล้อง</button>
+        <button id="btnStop" class="btn-stop" onclick="stopCamera()" disabled>⏹ หยุด</button>
+    </div>
+
+    <div class="log" id="logArea">Log ระบบ...</div>
+
+    <script>
+        // --- ส่วนการตั้งค่า ---
+        // ใส่ URL Google Apps Script เดิมของคุณที่นี่
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyjbm3yoBaly8pVeXKz1QTpieUe_KjjNWpatAgq_mx3jtkX7zs6vFKm8DXzBCkxNrJm/exec"; 
+        
+        const LINE_POSITION_PERCENT = 0.6;
+        const COOLDOWN_TIME = 2000;
+        
+        let model;
+        let video = document.getElementById("video");
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        let lastSentTime = 0;
+        let isModelLoaded = false;
+        let isStreaming = false; 
+        let animationId = null;
+
+        // โหลดโมเดล
+        cocoSsd.load().then(loadedModel => {
+            model = loadedModel;
+            isModelLoaded = true;
+            document.getElementById("loading").style.display = 'none'; // ซ่อนข้อความโหลด
+            log("✅ AI พร้อมทำงาน!");
+        });
+
+        async function startCamera() {
+            if (!isModelLoaded) { alert("รอ AI โหลดเสร็จก่อนครับ"); return; }
+            if (isStreaming) return;
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' },
+                    audio: false 
+                });
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    video.play();
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    isStreaming = true;
+                    toggleButtons(true);
+                    detectFrame();
+                    log("เริ่มการทำงานกล้อง");
+                };
+            } catch (err) {
+                alert("ไม่สามารถเปิดกล้องได้: " + err);
+            }
+        }
+
+        function stopCamera() {
+            if (!isStreaming) return;
+            isStreaming = false;
+            if (animationId) cancelAnimationFrame(animationId);
+
+            const stream = video.srcObject;
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+            
+            toggleButtons(false);
+            log("หยุดการทำงานแล้ว");
+        }
+
+        async function detectFrame() {
+            if (!isStreaming) return;
+
+            const predictions = await model.detect(video);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // วาดเส้นแดง
+            const lineY = canvas.height * LINE_POSITION_PERCENT;
+            ctx.beginPath();
+            ctx.moveTo(0, lineY);
+            ctx.lineTo(canvas.width, lineY);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            predictions.forEach(prediction => {
+                if (prediction.class === 'person') {
+                    const [x, y, width, height] = prediction.bbox;
+                    const centerY = y + (height / 2);
+
+                    ctx.strokeStyle = "#00FFFF";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, width, height);
+
+                    if (Math.abs(centerY - lineY) < 30) {
+                        ctx.strokeStyle = "lime";
+                        ctx.strokeRect(x, y, width, height);
+                        
+                        const now = Date.now();
+                        if (now - lastSentTime > COOLDOWN_TIME) {
+                            sendDataToGAS(1);
+                            lastSentTime = now;
+                        }
+                    }
+                }
+            });
+            animationId = requestAnimationFrame(detectFrame);
+        }
+
+        function sendDataToGAS(count) {
+            let display = document.getElementById("countDisplay");
+            display.innerText = parseInt(display.innerText) + count;
+            
+            // Effect ตัวเลขเด้ง
+            display.style.fontSize = "2rem";
+            setTimeout(() => display.style.fontSize = "1.5rem", 200);
+
+            fetch(GAS_URL, {
+                method: "POST",
+                mode: "no-cors", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ count: count, type: "entry" })
+            }).then(() => {
+                log("✅ ส่งข้อมูล +1 คน");
+            }).catch(err => {
+                log("❌ Error");
+            });
+        }
+
+        function toggleButtons(isRunning) {
+            document.getElementById("btnStart").disabled = isRunning;
+            document.getElementById("btnStop").disabled = !isRunning;
+        }
+
+        function log(msg) {
+            const logDiv = document.getElementById("logArea");
+            logDiv.innerHTML = `<div>${msg}</div>` + logDiv.innerHTML;
+        }
+    </script>
+</body>
+</html>
