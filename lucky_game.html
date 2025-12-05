@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Big Win Lucky Draw</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #00A69C;
+            --secondary: #00566B;
+            --accent: #F39C12;
+            --dark-bg: #1a1a1a;
+            --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--dark-bg);
+            background-image: radial-gradient(circle at center, #2a2a2a 0%, #000 100%);
+            color: white;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+        .header img { height: 80px; margin: 0 10px; }
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 10px;
+            text-shadow: 0 0 20px rgba(0, 166, 156, 0.5);
+        }
+
+        /* DISPLAY BOX */
+        .display-container {
+            position: relative;
+            width: 80%;
+            max-width: 800px;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 4px solid var(--primary);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 166, 156, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .display-text {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: var(--neon-glow);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* GLITCH EFFECT OVERLAY */
+        .scan-line {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: rgba(0, 255, 255, 0.5);
+            opacity: 0.5;
+            animation: scan 3s linear infinite;
+        }
+        @keyframes scan { 0% {top: 0;} 100% {top: 100%;} }
+
+        /* BUTTON */
+        .control-btn {
+            margin-top: 40px;
+            padding: 20px 60px;
+            font-size: 2rem;
+            font-family: 'Prompt', sans-serif;
+            font-weight: bold;
+            color: var(--dark-bg);
+            background: var(--accent);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--accent);
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px var(--accent); }
+        .control-btn:active { transform: scale(0.95); }
+        .control-btn:disabled { background: #555; box-shadow: none; color: #888; cursor: not-allowed; }
+
+        /* ADMIN BUTTON */
+        .admin-btn {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: transparent;
+            border: none;
+            color: #555;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 20;
+            transition: 0.3s;
+        }
+        .admin-btn:hover { color: white; transform: rotate(90deg); }
+
+        /* MODAL (POPUP) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            color: #333;
+            text-align: left;
+        }
+        .modal h3 { margin-top: 0; color: var(--secondary); }
+        textarea {
+            width: 100%;
+            height: 150px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 1rem;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .modal-actions { text-align: right; }
+        .btn-save { background: var(--primary); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-cancel { background: #ccc; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <button class="admin-btn" onclick="openSettings()"><i class="fa-solid fa-gear"></i></button>
+
+    <div class="header">
+        <div>
+            <img src="https://r8way.moph.go.th/r8way/img/R8NEWLOGO.png" alt="Logo">
+            <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" alt="Logo">
+        </div>
+        <div class="title">Event Quick Big Win</div>
+        <div style="font-size: 1.2rem; color: #ccc;">ลุ้นรับของขวัญปีใหม่ Super App</div>
+    </div>
+
+    <div class="display-container">
+        <div class="scan-line"></div>
+        <div class="display-text" id="displayText">PRESS START</div>
+    </div>
+
+    <button class="control-btn" id="spinBtn" onclick="startSpin()">เริ่มสุ่มรางวัล</button>
+
+    <div id="settingModal" class="modal">
+        <div class="modal-content">
+            <h3>⚙️ จัดการรายการของรางวัล</h3>
+            <p style="font-size:0.9rem; color:#666;">ใส่รายชื่อของรางวัล (1 บรรทัด ต่อ 1 ชิ้น)</p>
+            <textarea id="prizeInput"></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeSettings()">ยกเลิก</button>
+                <button class="btn-save" onclick="savePrizes()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        // ค่าเริ่มต้น (ถ้าไม่มีการตั้งค่า)
+        const defaultPrizes = [
+            "Smartwatch", 
+            "กระเป๋าผ้าลดโลกร้อน", 
+            "Gift Voucher 500.-", 
+            "แก้วน้ำเก็บความเย็น", 
+            "ชุดตรวจสุขภาพฟรี",
+            "หมอนรองคอ",
+            "Power Bank"
+        ];
+
+        let prizes = [];
+        let isSpinning = false;
+        let spinInterval;
+
+        // --- INIT ---
+        window.onload = () => {
+            loadPrizes();
+        };
+
+        // --- GAME LOGIC ---
+        function startSpin() {
+            if (isSpinning) return;
+            if (prizes.length === 0) { alert("ไม่มีรายการของรางวัล! กรุณาตั้งค่าก่อน"); return; }
+
+            isSpinning = true;
+            const btn = document.getElementById('spinBtn');
+            const display = document.getElementById('displayText');
+            
+            btn.disabled = true;
+            btn.innerText = "กำลังสุ่ม...";
+            display.style.color = "#00A69C"; // สีปกติ
+
+            let speed = 50; // ความเร็วเริ่มต้น (ms)
+            let counter = 0;
+            let maxLoops = 20 + Math.random() * 10; // สุ่มจำนวนรอบวิ่ง
+
+            // ฟังก์ชันหมุน (Recursive Timeout)
+            function loop() {
+                // สุ่มโชว์ชื่อ
+                const randomIndex = Math.floor(Math.random() * prizes.length);
+                display.innerText = prizes[randomIndex];
+
+                counter++;
+
+                if (counter < maxLoops) {
+                    // ยังหมุนอยู่
+                    setTimeout(loop, speed);
+                } else {
+                    // เริ่มชะลอความเร็ว (Slow down)
+                    if (speed < 600) {
+                        speed += 50; // เพิ่มเวลาหน่วง
+                        setTimeout(loop, speed);
+                    } else {
+                        // --- จบการสุ่ม ---
+                        endGame(prizes[randomIndex]);
+                    }
+                }
+            }
+
+            loop();
+        }
+
+        function endGame(winner) {
+            isSpinning = false;
+            const btn = document.getElementById('spinBtn');
+            const display = document.getElementById('displayText');
+
+            // Effect จบ
+            display.style.color = "#F39C12"; // เปลี่ยนเป็นสีทอง
+            display.style.transform = "scale(1.2)";
+            display.style.transition = "0.3s";
+            
+            btn.innerText = "เริ่มสุ่มรางวัล";
+            btn.disabled = false;
+
+            // ยิงพลุ (Confetti)
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#00A69C', '#F39C12', '#ffffff']
+            });
+
+            // คืนค่าขนาดตัวอักษร
+            setTimeout(() => {
+                display.style.transform = "scale(1)";
+            }, 500);
+        }
+
+        // --- ADMIN / SETTINGS LOGIC ---
+        function openSettings() {
+            const modal = document.getElementById('settingModal');
+            const textarea = document.getElementById('prizeInput');
+            
+            // แปลง Array เป็น Text บรรทัดละชิ้น
+            textarea.value = prizes.join("\n");
+            modal.style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingModal').style.display = 'none';
+        }
+
+        function savePrizes() {
+            const textarea = document.getElementById('prizeInput');
+            const text = textarea.value.trim();
+            
+            if (text === "") {
+                prizes = [];
+            } else {
+                // แปลง Text กลับเป็น Array แยกด้วยบรรทัด
+                prizes = text.split("\n").map(item => item.trim()).filter(item => item !== "");
+            }
+
+            // บันทึกลงเครื่อง (LocalStorage)
+            localStorage.setItem('digitalExpoPrizes', JSON.stringify(prizes));
+            
+            alert("บันทึกข้อมูลเรียบร้อย!");
+            closeSettings();
+        }
+
+        function loadPrizes() {
+            const saved = localStorage.getItem('digitalExpoPrizes');
+            if (saved) {
+                prizes = JSON.parse(saved);
+            } else {
+                prizes = defaultPrizes;
+            }
+        }
+
+    </script>
+</body>
+</html>
