@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Digital Hero Scan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #00A69C; /* หมอพร้อม Green */
+            --accent: #F39C12;  /* Gold */
+            --text-glow: 0 0 10px rgba(0, 166, 156, 0.8);
+            --hud-bg: rgba(0, 20, 20, 0.85);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            font-family: 'Prompt', sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* --- CAMERA LAYER --- */
+        #camera-feed {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            filter: grayscale(80%) contrast(1.2) brightness(0.6); /* ทำให้ดู Sci-fi */
+        }
+
+        /* --- UI LAYER --- */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+            pointer-events: none; /* ให้กดทะลุได้ในบางจุด */
+        }
+
+        /* HUD ELEMENTS */
+        .hud-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: linear-gradient(to bottom, var(--hud-bg), transparent);
+        }
+        .hud-logo img { height: 40px; }
+        .hud-status { 
+            font-size: 0.8rem; 
+            color: var(--primary); 
+            border: 1px solid var(--primary); 
+            padding: 5px 10px; 
+            border-radius: 20px;
+            text-shadow: var(--text-glow);
+        }
+
+        /* SCENE: INTRO & QUIZ */
+        .scene {
+            pointer-events: auto;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 166, 156, 0.3);
+            max-width: 90%;
+            width: 400px;
+            animation: fadeIn 0.5s;
+        }
+        
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--primary);
+            transition: 0.3s;
+        }
+        .btn-action:hover { transform: scale(1.05); background: #00d2c6; }
+
+        /* SCENE: SCANNING (THE DIGITAL TWIN) */
+        #scanner-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px; height: 500px; /* ขนาดหุ่นจำลอง */
+            display: none;
+        }
+
+        .human-silhouette {
+            width: 100%; height: 100%;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/800px-User_icon_2.svg.png'); /* Placeholder Silhouette */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: invert(47%) sepia(87%) saturate(1633%) hue-rotate(139deg) brightness(96%) contrast(101%); /* Filter ให้เป็นสีเขียว */
+            opacity: 0.5;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0; left: -10%;
+            width: 120%; height: 5px;
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary), 0 0 40px white;
+            animation: scanMove 3s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes scanMove {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* ORGAN HOTSPOTS */
+        .organ-point {
+            position: absolute;
+            width: 100px; /* ความกว้างป้าย */
+            left: 50%; /* เริ่มกึ่งกลาง */
+            transform: translateX(-50%) scale(0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: 0.5s;
+        }
+        
+        .dot {
+            width: 15px; height: 15px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+            margin-bottom: 5px;
+        }
+        
+        .label {
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        /* ตำแหน่งอวัยวะ (ปรับตามรูปคน) */
+        #eye-point { top: 8%; }
+        #lung-point { top: 25%; }
+        #heart-point { top: 30%; left: 55%; } /* หัวใจเอียงซ้ายหน่อย */
+        #liver-point { top: 40%; }
+        #kidney-point { top: 48%; }
+
+        .show-organ { transform: translateX(-50%) scale(1); }
+
+        /* SCENE: RESULT */
+        #result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            width: 100%;
+            pointer-events: auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero-badge {
+            font-size: 5rem;
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        .qr-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .qr-box img { width: 150px; height: 150px; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* DATA TEXT EFFECT */
+        .data-stream {
+            position: absolute;
+            right: 10px; top: 100px;
+            font-family: monospace;
+            color: rgba(0, 166, 156, 0.5);
+            font-size: 0.7rem;
+            text-align: right;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- VIDEO BACKGROUND -->
+    <video id="camera-feed" autoplay playsinline muted></video>
+
+    <!-- UI LAYER -->
+    <div id="ui-layer">
+        
+        <!-- HUD HEADER -->
+        <div class="hud-header">
+            <div class="hud-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/MorProm_Logo.png/600px-MorProm_Logo.png" alt="MorProm">
+            </div>
+            <div class="hud-status">SYSTEM: ONLINE</div>
+        </div>
+
+        <!-- SCENE 1: INTRO & ASSESSMENT -->
+        <div id="intro-scene" class="scene">
+            <h1 style="color:var(--primary); margin:0;">DIGITAL HERO SCAN</h1>
+            <p style="font-size:0.9rem; color:#ccc;">ค้นหาพลังฮีโร่ในตัวคุณ</p>
+            <hr style="border-color:rgba(255,255,255,0.2);">
+            
+            <div id="quiz-part">
+                <p>คุณอยากเป็นผู้ให้ที่ยิ่งใหญ่หรือไม่?</p>
+                <div style="display:flex; justify-content:center; gap:10px;">
+                    <button class="btn-action" style="padding:10px 20px; background:#333;" onclick="startScan()">ไม่แน่ใจ</button>
+                    <button class="btn-action" style="padding:10px 20px;" onclick="startScan()">แน่นอน!</button>
+                </div>
+                <p style="font-size:0.8rem; margin-top:15px; color:#aaa;">*แม้มีโรคประจำตัว บางอวัยวะก็ยังบริจาคได้</p>
+            </div>
+        </div>
+
+        <!-- DIGITAL TWIN (Scanner Area) -->
+        <div id="scanner-overlay">
+            <div class="human-silhouette"></div>
+            <div class="scan-line" id="scan-bar"></div>
+
+            <!-- Organ Hotspots -->
+            <div id="eye-point" class="organ-point">
+                <div class="dot"></div><div class="label"><i class="fa-solid fa-eye"></i> ดวงตา (2)</div>
+            </div>
+            <div id="lung-point" class="organ-point">
+                <div class="dot"></div><div class="label"><i class="fa-solid fa-lungs"></i> ปอด (2)</div>
+            </div>
+            <div id="heart-point" class="organ-point">
+                <div class="dot"></div><div class="label"><i class="fa-solid fa-heart-pulse"></i> หัวใจ (1)</div>
+            </div>
+            <div id="liver-point" class="organ-point">
+                <div class="dot"></div><div class="label"><i class="fa-solid fa-dna"></i> ตับ (1)</div>
+            </div>
+            <div id="kidney-point" class="organ-point">
+                <div class="dot"></div><div class="label"><i class="fa-solid fa-capsules"></i> ไต (2)</div>
+            </div>
+        </div>
+
+        <!-- MATRIX DATA STREAM -->
+        <div class="data-stream" id="data-text"></div>
+
+        <!-- SCENE 3: RESULT -->
+        <div id="result-screen">
+            <div class="hero-badge"><i class="fa-solid fa-medal"></i></div>
+            <h1 style="margin:10px 0; color:var(--primary);">HERO FOUND!</h1>
+            <h2 style="margin:0; font-weight:400;">คุณคือฮีโร่</h2>
+            <p style="font-size:1.2rem;">ร่างกายของคุณสามารถ<br><b style="color:var(--accent); font-size:1.5rem;">ต่อลมหายใจได้ถึง 8 ชีวิต</b></p>
+            
+            <div class="qr-box">
+                <!-- Generate QR Code to MorProm Link -->
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://onelink.to/kzd4yy" alt="Donate QR">
+                <div style="color:#333; font-size:0.8rem; margin-top:5px; font-weight:bold;">สแกนเพื่อบริจาคทันที</div>
+            </div>
+            
+            <a href="https://onelink.to/kzd4yy" target="_blank" class="btn-action" style="text-decoration:none; display:inline-block;">
+                <i class="fa-solid fa-hand-holding-heart"></i> กดบริจาคผ่านหมอพร้อม
+            </a>
+            <br><br>
+            <button onclick="location.reload()" style="background:transparent; border:none; color:#aaa; cursor:pointer;"><u>เริ่มสแกนใหม่</u></button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CAMERA SETUP ---
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                document.getElementById('camera-feed').srcObject = stream;
+            } catch (err) {
+                console.log("Camera Error: ", err);
+                // ถ้าเปิดกล้องไม่ได้ จะเป็นจอดำ ก็ยังเล่นได้
+            }
+        }
+        window.onload = startCamera;
+
+        // --- SOUND ENGINE (Simple Beeps) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            if (type === 'scan') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 1);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            } else if (type === 'ping') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            } else if (type === 'success') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.2);
+            }
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + (type === 'scan' ? 1 : 0.5));
+        }
+
+        // --- GAME LOGIC ---
+        function startScan() {
+            // ซ่อน Intro
+            document.getElementById('intro-scene').style.display = 'none';
+            
+            // แสดง Scanner
+            const scanner = document.getElementById('scanner-overlay');
+            const bar = document.getElementById('scan-bar');
+            scanner.style.display = 'block';
+            bar.style.display = 'block';
+
+            // เริ่ม Effect ตัวหนังสือวิ่ง
+            startDataStream();
+
+            // ลำดับการสแกน (Timeline)
+            let timeline = 0;
+            const step = 800; // ms
+
+            // 1. Scan Sound Loop
+            const scanInterval = setInterval(() => playSound('scan'), 2000);
+
+            // 2. Reveal Organs sequence
+            setTimeout(() => { showOrgan('eye-point'); }, step * 1);
+            setTimeout(() => { showOrgan('lung-point'); }, step * 2);
+            setTimeout(() => { showOrgan('heart-point'); }, step * 3);
+            setTimeout(() => { showOrgan('liver-point'); }, step * 4);
+            setTimeout(() => { showOrgan('kidney-point'); }, step * 5);
+
+            // 3. Finish
+            setTimeout(() => {
+                clearInterval(scanInterval);
+                clearInterval(dataInterval);
+                showResult();
+            }, step * 7);
+        }
+
+        function showOrgan(id) {
+            playSound('ping');
+            document.getElementById(id).classList.add('show-organ');
+        }
+
+        function showResult() {
+            playSound('success');
+            document.getElementById('scanner-overlay').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'flex';
+        }
+
+        // --- VISUAL EFFECT: MATRIX DATA ---
+        let dataInterval;
+        function startDataStream() {
+            const el = document.getElementById('data-text');
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            dataInterval = setInterval(() => {
+                let txt = "";
+                for(let i=0; i<5; i++) {
+                    txt += "Analyzing: " + Math.random().toString(36).substring(7) + "<br>";
+                    txt += "Bio-Metric: " + Math.floor(Math.random()*100) + "%<br>";
+                }
+                el.innerHTML = txt;
+            }, 100);
+        }
+
+    </script>
+</body>
+</html>
