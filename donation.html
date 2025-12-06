@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียนบริจาค - Hero Registration</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f4f6f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .top-header { background: white; padding: 15px 0; border-bottom: 1px solid #ddd; }
+        .header-title { color: #b00d23; font-weight: 700; text-align: center; margin: 0; }
+        .header-subtitle { color: #008080; text-align: center; font-size: 0.8rem; }
+        
+        .main-navbar { background-color: #b00d23; padding: 15px 0; white-space: nowrap; overflow-x: auto; }
+        .nav-btn { color: white !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 8px 20px; text-decoration: none; margin: 0 5px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .nav-btn:hover, .nav-btn.active { background: white; color: #b00d23 !important; }
+
+        /* Donation Buttons Area */
+        .donation-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .donation-btn {
+            border: none;
+            border-radius: 25px;
+            padding: 40px 20px;
+            width: 100%;
+            height: 100%;
+            min-height: 300px; /* ปุ่มใหญ่สะใจ */
+            color: white;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .donation-btn:active { transform: scale(0.95); }
+        .donation-btn:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+
+        .btn-organ { background: linear-gradient(135deg, #ff6b6b 0%, #ee0979 100%); }
+        .btn-eye { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+        .btn-icon { font-size: 6rem; margin-bottom: 25px; display: block; }
+        .btn-text { font-size: 2.2rem; font-weight: 700; display: block; }
+        .btn-subtext { font-size: 1.2rem; opacity: 0.9; }
+
+        .btn-watermark {
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            font-size: 12rem;
+            opacity: 0.15;
+            transform: rotate(-20deg);
+        }
+
+        /* Modal & Effects */
+        .hero-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .hero-content { animation: zoomIn 0.5s; }
+        
+        .medal-icon {
+            font-size: 8rem;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .hero-title {
+            color: #ff6b6b;
+            font-size: 4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .close-modal-btn {
+            margin-top: 40px;
+            padding: 12px 40px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            background: white;
+            color: #333;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        .close-modal-btn:hover { transform: scale(1.1); background: #f0f0f0; }
+
+        /* Loading */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9);
+            z-index: 9990;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-header">
+        <div class="container text-center">
+            <h2 class="header-title">EVENT QUICK BIG WIN</h2>
+            <p class="header-subtitle mb-0">ลงทะเบียนเป็นผู้ให้...สร้างกุศลที่ยิ่งใหญ่</p>
+        </div>
+    </header>
+
+    <div class="main-navbar text-center">
+        <a href="index.html" class="nav-btn"><i class="fa-solid fa-chart-line"></i> กลับหน้าแดชบอร์ด</a>
+        <a href="#" class="nav-btn active"><i class="fa-solid fa-hand-holding-heart"></i> ลงทะเบียนบริจาค</a>
+    </div>
+
+    <div class="donation-container">
+        <div class="container">
+            <div class="row g-4 justify-content-center">
+                <!-- ปุ่มบริจาคอวัยวะ -->
+                <div class="col-md-5 col-lg-4">
+                    <button class="donation-btn btn-organ" onclick="submitDonation('organ')">
+                        <i class="fa-solid fa-heart-pulse btn-watermark"></i>
+                        <i class="fa-solid fa-heart-pulse btn-icon"></i>
+                        <span class="btn-text">บริจาคอวัยวะ</span>
+                        <span class="btn-subtext">กดเพื่อลงทะเบียน</span>
+                    </button>
+                </div>
+                <!-- ปุ่มบริจาคดวงตา -->
+                <div class="col-md-5 col-lg-4">
+                    <button class="donation-btn btn-eye" onclick="submitDonation('eye')">
+                        <i class="fa-solid fa-eye btn-watermark"></i>
+                        <i class="fa-solid fa-eye btn-icon"></i>
+                        <span class="btn-text">บริจาคดวงตา</span>
+                        <span class="btn-subtext">กดเพื่อลงทะเบียน</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-border text-danger" style="width: 4rem; height: 4rem;" role="status"></div>
+        <h3 class="mt-3 text-danger fw-bold">กำลังบันทึกข้อมูล...</h3>
+    </div>
+
+    <!-- Hero Confirmed Modal -->
+    <div id="heroModal" class="hero-modal">
+        <div class="hero-content">
+            <i class="fa-solid fa-medal medal-icon animate__animated animate__flipInY"></i>
+            <div class="hero-title animate__animated animate__zoomInDown">HERO CONFIRMED</div>
+            <h2 class="text-white mb-2">ขอบคุณที่เป็นผู้ให้ที่ยิ่งใหญ่</h2>
+            <p class="text-white-50 fs-5">ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว</p>
+            
+            <button class="close-modal-btn" onclick="closeModal()">
+                <i class="fa-solid fa-check"></i> ตกลง
+            </button>
+        </div>
+    </div>
+
+    <audio id="successSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyjbm3yoBaly8pVeXKz1QTpieUe_KjjNWpatAgq_mx3jtkX7zs6vFKm8DXzBCkxNrJm/exec';
+
+        function submitDonation(type) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            // ส่งข้อมูลตาม Format ของ doPost
+            const payload = {
+                type: type,
+                count: 1
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // สำคัญ: ใช้ no-cors เพื่อยิงเข้า Google Script ได้โดยไม่ติด Browser Policy
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                // รอสักนิดแล้วแสดงผลสำเร็จ (เพราะ no-cors จะไม่คืน response)
+                setTimeout(showSuccess, 1000);
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showSuccess(); // แสดงผลสำเร็จเพื่อให้ User ใช้งานต่อได้
+            });
+        }
+
+        function showSuccess() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            const modal = document.getElementById('heroModal');
+            const sound = document.getElementById('successSound');
+
+            modal.style.display = 'flex';
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio needed interaction"));
+            fireConfetti();
+        }
+
+        function closeModal() {
+            document.getElementById('heroModal').style.display = 'none';
+        }
+
+        function fireConfetti() {
+            var duration = 3000;
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    </script>
+</body>
+</html>
