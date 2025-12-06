@@ -3,401 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Hero Run: วิ่งกู้ชีพ</title>
+    <title>Hero Run</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
-            --primary: #00A69C;
-            --accent: #F39C12;
-            --danger: #e74c3c;
-            --sky: #87CEEB;
-            --ground: #2c3e50;
+            --primary: #D32F2F; /* Red */
+            --accent: #FFD700;
+            --danger: #C62828;
+            --sky: #81D4FA;
+            --ground: #37474F;
         }
-
-        body {
-            font-family: 'Prompt', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: var(--sky);
-            touch-action: none; /* ป้องกันการซูม/เลื่อนหน้าจอ */
-        }
-
-        /* HUD */
-        .hud {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 2px 2px 0 #000;
-        }
+        body { font-family: 'Prompt', sans-serif; margin: 0; overflow: hidden; background: var(--sky); touch-action: none; }
+        .hud { position: absolute; top: 20px; left: 20px; z-index: 10; font-size: 1.5rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 0 #000; }
         .hud span { color: var(--accent); }
-
-        .game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Start/Game Over Screen */
-        .overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            z-index: 20;
-        }
-        
-        .title { font-size: 3rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .subtitle { font-size: 1.2rem; margin-bottom: 30px; color: #ddd; }
-        
-        .btn-start {
-            padding: 15px 40px;
-            font-size: 1.8rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: 'Prompt', sans-serif;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .instructions {
-            margin-top: 20px;
-            font-size: 1rem;
-            opacity: 0.8;
-        }
-        
-        .score-board { display: none; text-align: center; }
-        .final-score { font-size: 4rem; color: var(--accent); font-weight: bold; }
-
+        canvas { display: block; width: 100%; height: 100%; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 20; }
+        .title { font-size: 3rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; text-shadow: 2px 2px var(--danger); }
+        .btn-start { padding: 15px 40px; font-size: 1.8rem; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; font-family: 'Prompt', sans-serif; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
-
-    <div class="hud">
-        SCORE: <span id="score">0</span> | 
-        <i class="fa-solid fa-heart" style="color:#e74c3c"></i> x <span id="hearts">0</span>
-    </div>
-
-    <div class="game-container">
-        <canvas id="gameCanvas"></canvas>
-    </div>
-
+    <div class="hud">SCORE: <span id="score">0</span> | <i class="fa-solid fa-heart" style="color:#D32F2F"></i> x <span id="hearts">0</span></div>
+    <canvas id="gameCanvas"></canvas>
     <div id="startScreen" class="overlay">
-        <div class="title">HERO RUN</div>
-        <div class="subtitle">วิ่งกู้ชีพ เก็บหัวใจบริจาค</div>
+        <div class="title">HERO RUN</div><div style="margin-bottom:20px">วิ่งกู้ชีพ เก็บหัวใจบริจาค</div>
         <button class="btn-start" onclick="initGame()">แตะเพื่อเริ่มวิ่ง!</button>
-        <div class="instructions">
-            <i class="fa-solid fa-hand-pointer"></i> แตะหน้าจอเพื่อกระโดด<br>
-            <i class="fa-solid fa-heart"></i> เก็บหัวใจ | <i class="fa-solid fa-virus"></i> หลบไวรัส
-        </div>
     </div>
-
     <div id="gameOverScreen" class="overlay" style="display: none;">
-        <div class="title" style="color:var(--danger)">GAME OVER</div>
-        <div class="score-board" style="display:block">
-            คะแนนรวม
-            <div class="final-score" id="finalScore">0</div>
-        </div>
-        <button class="btn-start" onclick="resetGame()">เล่นใหม่อีกครั้ง</button>
+        <div class="title" style="color:#FF5252">GAME OVER</div>
+        <div style="font-size:2rem; margin-bottom:20px">คะแนน: <span id="finalScore" style="color:gold">0</span></div>
+        <button class="btn-start" onclick="initGame()">เล่นใหม่</button>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let animationId;
-        
-        // Game Variables
-        let gameSpeed = 5;
-        let score = 0;
-        let heartsCollected = 0;
-        let isGameOver = false;
-        let frame = 0;
+        const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
+        let gameSpeed, score, hearts, isGameOver, frame, player, obstacles, items, animId;
+        const icons = { player: '\uf0f0', heart: '\uf004', virus: '\ue074' };
 
-        // Resize Canvas
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
 
-        // --- ASSETS (DRAWING ICONS) ---
-        // เราใช้วิธีวาด Text FontAwesome ลงบน Canvas โดยตรงเพื่อประสิทธิภาพ
-        const icons = {
-            player: '\uf0f0', // Doctor
-            heart: '\uf004',  // Heart
-            eye: '\uf06e',    // Eye
-            virus: '\ue074'   // Virus
-        };
-
-        // --- ENTITIES ---
         class Player {
-            constructor() {
-                this.size = 50;
-                this.x = 50;
-                this.y = canvas.height - 150;
-                this.vy = 0; // Vertical Velocity
-                this.gravity = 0.8; // แรงโน้มถ่วง
-                this.jumpStrength = -15; // แรงกระโดด
-                this.groundY = canvas.height - 150; // ระดับพื้น
-                this.isJumping = false;
+            constructor() { this.size=50; this.x=50; this.y=canvas.height-150; this.vy=0; this.gravity=0.8; this.jumpStrength=-15; this.groundY=canvas.height-150; this.isJumping=false; }
+            update() { this.y+=this.vy; if(this.y<this.groundY){this.vy+=this.gravity;}else{this.y=this.groundY;this.vy=0;this.isJumping=false;} }
+            draw() { 
+                ctx.font='900 50px "Font Awesome 6 Free"'; 
+                ctx.fillStyle='#FFFFFF'; ctx.fillText(icons.player, this.x, this.y+this.size); // ชุดขาว
+                ctx.lineWidth=2; ctx.strokeStyle='#D32F2F'; ctx.strokeText(icons.player, this.x, this.y+this.size); // ขอบแดง
             }
-
-            update() {
-                // Physics
-                this.y += this.vy;
-                
-                // Gravity applies if in air
-                if (this.y < this.groundY) {
-                    this.vy += this.gravity;
-                } else {
-                    this.y = this.groundY;
-                    this.vy = 0;
-                    this.isJumping = false;
-                }
-            }
-
-            draw() {
-                ctx.font = '900 50px "Font Awesome 6 Free"';
-                ctx.fillStyle = '#00A69C'; // หมอสีเขียว
-                ctx.fillText(icons.player, this.x, this.y + this.size);
-            }
-
-            jump() {
-                if (!this.isJumping) {
-                    this.vy = this.jumpStrength;
-                    this.isJumping = true;
-                }
-            }
+            jump() { if(!this.isJumping){this.vy=this.jumpStrength;this.isJumping=true;} }
         }
 
         class Obstacle {
-            constructor() {
-                this.x = canvas.width;
-                this.y = canvas.height - 140; // อยู่พื้น
-                this.size = 40;
-                this.speed = gameSpeed;
-                this.markedForDeletion = false;
-            }
-            update() {
-                this.x -= this.speed;
-                if (this.x < -this.size) this.markedForDeletion = true;
-            }
-            draw() {
-                ctx.font = '900 40px "Font Awesome 6 Free"';
-                ctx.fillStyle = '#8e44ad'; // ไวรัสสีม่วง
-                ctx.fillText(icons.virus, this.x, this.y + this.size);
-            }
+            constructor() { this.x=canvas.width; this.y=canvas.height-140; this.size=40; this.del=false; }
+            update() { this.x-=gameSpeed; if(this.x<-this.size)this.del=true; }
+            draw() { ctx.font='900 40px "Font Awesome 6 Free"'; ctx.fillStyle='#5E35B1'; ctx.fillText(icons.virus, this.x, this.y+this.size); }
         }
 
         class Item {
-            constructor() {
-                this.x = canvas.width;
-                // สุ่มความสูง (พื้น หรือ กลางอากาศ)
-                this.y = Math.random() > 0.5 ? canvas.height - 150 : canvas.height - 250; 
-                this.size = 40;
-                this.speed = gameSpeed;
-                this.type = Math.random() > 0.5 ? 'heart' : 'eye';
-                this.markedForDeletion = false;
-            }
-            update() {
-                this.x -= this.speed;
-                // Effect ลอยขึ้นลงนิดหน่อย
-                this.y += Math.sin(frame * 0.1) * 2;
-                if (this.x < -this.size) this.markedForDeletion = true;
-            }
-            draw() {
-                ctx.font = '900 40px "Font Awesome 6 Free"';
-                ctx.fillStyle = this.type === 'heart' ? '#e74c3c' : '#3498db';
-                const icon = this.type === 'heart' ? icons.heart : icons.eye;
-                ctx.fillText(icon, this.x, this.y + this.size);
-            }
+            constructor() { this.x=canvas.width; this.y=Math.random()>0.5?canvas.height-150:canvas.height-250; this.size=40; this.del=false; }
+            update() { this.x-=gameSpeed; this.y+=Math.sin(frame*0.1)*2; if(this.x<-this.size)this.del=true; }
+            draw() { ctx.font='900 40px "Font Awesome 6 Free"'; ctx.fillStyle='#D32F2F'; ctx.fillText(icons.heart, this.x, this.y+this.size); }
         }
-
-        class Background {
-            constructor() {
-                this.x = 0;
-                this.groundHeight = 100;
-            }
-            update() {
-                this.x -= gameSpeed * 0.5; // Parallax effect
-                if (this.x <= -canvas.width) this.x = 0;
-            }
-            draw() {
-                // Draw Ground
-                ctx.fillStyle = '#2c3e50';
-                ctx.fillRect(0, canvas.height - this.groundHeight, canvas.width, this.groundHeight);
-                
-                // Draw decorative line
-                ctx.strokeStyle = '#00A69C';
-                ctx.lineWidth = 5;
-                ctx.beginPath();
-                ctx.moveTo(0, canvas.height - this.groundHeight);
-                ctx.lineTo(canvas.width, canvas.height - this.groundHeight);
-                ctx.stroke();
-            }
-        }
-
-        // --- GLOBAL OBJECTS ---
-        let player;
-        let obstacles = [];
-        let items = [];
-        let background;
 
         function initGame() {
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('gameOverScreen').style.display = 'none';
-            
-            player = new Player();
-            background = new Background();
-            obstacles = [];
-            items = [];
-            score = 0;
-            heartsCollected = 0;
-            gameSpeed = 6;
-            isGameOver = false;
-            frame = 0;
-
-            updateHUD();
+            document.getElementById('startScreen').style.display='none'; document.getElementById('gameOverScreen').style.display='none';
+            player = new Player(); obstacles = []; items = []; score=0; hearts=0; gameSpeed=6; isGameOver=false; frame=0;
             animate();
         }
 
-        function spawnObstacles() {
-            // ทุกๆ 120 เฟรม (ประมาณ 2 วิ) สุ่มเกิดไวรัส
-            if (frame % 120 === 0) {
-                if (Math.random() < 0.5) obstacles.push(new Obstacle());
-            }
-        }
-
-        function spawnItems() {
-            // ทุกๆ 90 เฟรม สุ่มเกิดไอเทม
-            if (frame % 90 === 0) {
-                if (Math.random() < 0.7) items.push(new Item());
-            }
-        }
-
         function animate() {
-            if (isGameOver) return;
+            if(isGameOver)return;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
             
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Background
-            background.update();
-            background.draw();
+            // Ground
+            ctx.fillStyle='#37474F'; ctx.fillRect(0,canvas.height-100,canvas.width,100);
+            ctx.strokeStyle='#D32F2F'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(0,canvas.height-100); ctx.lineTo(canvas.width,canvas.height-100); ctx.stroke();
 
-            // Player
-            player.update();
-            player.draw();
+            player.update(); player.draw();
 
-            // Handle Obstacles
-            spawnObstacles();
-            obstacles.forEach((obs, index) => {
-                obs.speed = gameSpeed;
-                obs.update();
-                obs.draw();
+            if(frame%120===0 && Math.random()<0.6) obstacles.push(new Obstacle());
+            obstacles.forEach((o,i)=>{ o.update(); o.draw(); if(player.x<o.x+o.size && player.x+player.size>o.x && player.y<o.y+o.size && player.y+player.size>o.y) gameOver(); if(o.del)obstacles.splice(i,1); });
 
-                // Collision Detection (Simple Box)
-                if (
-                    player.x < obs.x + obs.size &&
-                    player.x + player.size > obs.x &&
-                    player.y < obs.y + obs.size &&
-                    player.y + player.size > obs.y
-                ) {
-                    gameOver();
+            if(frame%90===0 && Math.random()<0.7) items.push(new Item());
+            items.forEach((it,i)=>{ 
+                it.update(); it.draw(); 
+                if(player.x<it.x+it.size && player.x+player.size>it.x && player.y<it.y+it.size && player.y+player.size>it.y) {
+                    score+=100; hearts++; items.splice(i,1); if(hearts%5===0)gameSpeed+=0.5;
                 }
-
-                if (obs.markedForDeletion) obstacles.splice(index, 1);
+                if(it.del)items.splice(i,1); 
             });
 
-            // Handle Items
-            spawnItems();
-            items.forEach((item, index) => {
-                item.speed = gameSpeed;
-                item.update();
-                item.draw();
-
-                // Collision with Item
-                if (
-                    player.x < item.x + item.size &&
-                    player.x + player.size > item.x &&
-                    player.y < item.y + item.size &&
-                    player.y + player.size > item.y
-                ) {
-                    // Collect!
-                    score += 100;
-                    heartsCollected++;
-                    items.splice(index, 1);
-                    
-                    // Speed up slightly
-                    if (heartsCollected % 5 === 0) gameSpeed += 0.5;
-                    updateHUD();
-                }
-                
-                if (item.markedForDeletion) items.splice(index, 1);
-            });
-
-            // Score Increase over time
-            if (frame % 10 === 0) score++;
-            updateHUD();
-
-            frame++;
-            animationId = requestAnimationFrame(animate);
+            if(frame%10===0) score++;
+            document.getElementById('score').innerText=score; document.getElementById('hearts').innerText=hearts;
+            frame++; animId=requestAnimationFrame(animate);
         }
 
-        function updateHUD() {
-            document.getElementById('score').innerText = score;
-            document.getElementById('hearts').innerText = heartsCollected;
-        }
-
-        function gameOver() {
-            isGameOver = true;
-            document.getElementById('finalScore').innerText = score;
-            document.getElementById('gameOverScreen').style.display = 'flex';
-        }
-
-        function resetGame() {
-            initGame();
-        }
-
-        // --- CONTROLS ---
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') player.jump();
-        });
-        
-        window.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // ป้องกันการ scroll
-            player.jump();
-        });
-        
-        window.addEventListener('mousedown', () => {
-            player.jump();
-        });
-
+        function gameOver() { isGameOver=true; document.getElementById('finalScore').innerText=score; document.getElementById('gameOverScreen').style.display='flex'; }
+        window.addEventListener('touchstart', (e)=>{e.preventDefault();player.jump();});
+        window.addEventListener('mousedown', ()=>player.jump());
+        window.addEventListener('keydown', (e)=>{if(e.code==='Space')player.jump();});
     </script>
 </body>
 </html>
