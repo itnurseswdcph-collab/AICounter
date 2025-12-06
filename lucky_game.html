@@ -10,313 +10,173 @@
 
     <style>
         :root {
-    --primary: #FF5252; /* แดงนีออนสว่าง */
-    --secondary: #D32F2F;
-    --accent: #FFD700; /* ทอง */
-    --fail: #7f8c8d;
-    --dark-bg: #1a0505; /* พื้นหลังดำอมแดงเข้มๆ */
-    --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary);
-}
+            /* Theme: Red Gala */
+            --primary: #FF5252;
+            --secondary: #D32F2F;
+            --accent: #FFD700; /* Gold */
+            --dark-bg: #1a0505; /* Blackish Red */
+            --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+        }
 
-body {
-    background-color: var(--dark-bg);
-    background-image: radial-gradient(circle at center, #3e0a0a 0%, #000 100%); /* ไล่เฉดแดงเข้ม */
-}
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--dark-bg);
+            background-image: radial-gradient(circle at center, #3e0a0a 0%, #000 100%);
+            color: white; margin: 0; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+        }
 
-/* กรอบหน้าจอ */
-.display-container {
-    border: 4px solid var(--primary);
-    box-shadow: 0 0 30px rgba(255, 82, 82, 0.3);
-}
+        /* HEADER */
+        .header { position: absolute; top: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .logo-row { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .logo-img { height: 60px; object-fit: contain; }
+        .logo-circle { height: 60px; border-radius: 50%; border: 2px solid var(--primary); }
+        .title { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px var(--secondary); margin: 0; }
+        .subtitle { font-size: 1.1rem; color: #ccc; margin-top: 5px; }
 
-.display-text { color: var(--primary); }
+        /* DISPLAY */
+        .display-container {
+            position: relative; width: 85%; max-width: 900px; height: 350px;
+            background: rgba(0, 0, 0, 0.6); border: 4px solid var(--primary); border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); display: flex; align-items: center; justify-content: center;
+            overflow: hidden; backdrop-filter: blur(10px); transition: 0.5s;
+        }
+        .display-text { font-size: 4.5rem; font-weight: bold; color: var(--primary); text-shadow: var(--neon-glow); text-align: center; padding: 20px; word-wrap: break-word; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255, 82, 82, 0.5); opacity: 0.5; animation: scan 3s linear infinite; }
+        @keyframes scan { 0% {top: 0;} 100% {top: 100%;} }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
+        .shake-anim { animation: shake 0.5s; }
 
-/* ปุ่มกด */
-.control-btn {
-    background: var(--accent); /* ปุ่มสีทอง */
-    color: #3e0a0a; /* ตัวหนังสือสีแดงเข้ม */
-}
+        /* BUTTON */
+        .control-btn {
+            margin-top: 40px; padding: 20px 60px; font-size: 2rem; font-family: 'Prompt', sans-serif; font-weight: bold;
+            color: #3e0a0a; background: var(--accent); border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 20px var(--accent); transition: 0.2s; text-transform: uppercase;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px var(--accent); }
+        .control-btn:disabled { background: #555; box-shadow: none; color: #888; cursor: not-allowed; }
+
+        .admin-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #555; font-size: 1.5rem; cursor: pointer; z-index: 20; }
+        .admin-btn:hover { color: white; transform: rotate(90deg); transition: 0.3s;}
+
+        /* MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 600px; color: #333; max-height: 90vh; overflow-y: auto; }
+        textarea { width: 100%; font-family: 'Prompt', sans-serif; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; box-sizing: border-box; }
+        .btn-save { background: var(--secondary); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-cancel { background: #ccc; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
     </style>
 </head>
 <body>
-
     <button class="admin-btn" onclick="openSettings()"><i class="fa-solid fa-gear"></i></button>
-
     <div class="header">
         <div class="logo-row">
-            <img src="https://r8way.moph.go.th/r8way/img/R8NEWLOGO.png" class="logo-img" alt="R8">
-            <img src="https://skko.moph.go.th/dward/document_file/skko/common_form_upload_file/20160322201256_410195252.png" class="logo-img" alt="SSJ">
-            <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img" alt="SWD">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/MorProm_Logo.png/600px-MorProm_Logo.png" class="logo-circle" alt="MorProm">
+            <img src="https://r8way.moph.go.th/r8way/img/R8NEWLOGO.png" class="logo-img">
+            <img src="https://skko.moph.go.th/dward/document_file/skko/common_form_upload_file/20160322201256_410195252.png" class="logo-img">
+            <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/MorProm_Logo.png/600px-MorProm_Logo.png" class="logo-circle">
         </div>
         <div class="title">Event Quick Big Win</div>
         <div class="subtitle">ลุ้นรับของขวัญปีใหม่ Super App</div>
     </div>
 
     <div class="display-container" id="displayBox">
-        <div class="scan-line"></div>
-        <div class="display-text" id="displayText">PRESS START</div>
+        <div class="scan-line"></div><div class="display-text" id="displayText">PRESS START</div>
     </div>
-
     <button class="control-btn" id="spinBtn" onclick="startSpin()">เริ่มสุ่มรางวัล</button>
 
     <div id="settingModal" class="modal">
         <div class="modal-content">
-            <h3>⚙️ ตั้งค่าสต็อกรางวัล</h3>
-            
-            <label class="section-label">🎁 รายการรางวัลและจำนวน (Name : Qty)</label>
-            <span class="hint">รูปแบบ: <b>ชื่อรางวัล : จำนวน</b> (เช่น Smartwatch : 3)</span>
-            <textarea id="prizeInput" rows="8" placeholder="Smartwatch : 3&#10;ตู้เย็น : 1&#10;แก้วน้ำ : 50"></textarea>
-
-            <label class="section-label">😢 ข้อความปลอบใจ (ไม่จำกัดจำนวน)</label>
-            <span class="hint">ใส่บรรทัดละ 1 ข้อความ</span>
-            <textarea id="consolationInput" rows="5" placeholder="ขอบคุณที่ร่วมสนุก&#10;ไว้ลุ้นใหม่โอกาสหน้า&#10;เกือบได้แล้วเชียว"></textarea>
-
-            <div class="modal-actions" style="text-align: right; margin-top: 20px;">
-                <button class="btn-cancel" onclick="closeSettings()">ยกเลิก</button>
-                <button class="btn-save" onclick="saveData()">บันทึก</button>
-            </div>
+            <h3 style="color:var(--secondary)">⚙️ ตั้งค่าสต็อกรางวัล</h3>
+            <label>🎁 รางวัล (Name : Qty)</label><textarea id="prizeInput" rows="8"></textarea>
+            <label>😢 ข้อความปลอบใจ</label><textarea id="consolationInput" rows="5"></textarea>
+            <div style="text-align: right; margin-top: 20px;"><button class="btn-cancel" onclick="closeSettings()">ยกเลิก</button><button class="btn-save" onclick="saveData()">บันทึก</button></div>
         </div>
     </div>
 
     <script>
-        // --- SOUND ENGINE (Web Audio API) ---
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioContext();
-
-        function playTone(freq, type, duration) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.type = type; 
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function playTickSound() { playTone(800, 'square', 0.05); }
-        function playWinSound() {
-            setTimeout(() => playTone(523.25, 'triangle', 0.4), 0);
-            setTimeout(() => playTone(659.25, 'triangle', 0.4), 100);
-            setTimeout(() => playTone(783.99, 'triangle', 0.4), 200);
-            setTimeout(() => playTone(1046.50, 'square', 0.8), 300);
-        }
-        function playLoseSound() {
-            setTimeout(() => playTone(400, 'sawtooth', 0.3), 0);
-            setTimeout(() => playTone(300, 'sawtooth', 0.3), 200);
-            setTimeout(() => playTone(200, 'sawtooth', 0.6), 400);
-        }
-
-        // --- DATA STRUCTURE ---
-        // Prizes structure: [{name: "Item", qty: 5}, ...]
-        let prizeList = []; 
-        let consolationMsgs = [];
-
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(f,t,d){if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.type=t;o.frequency.setValueAtTime(f,audioCtx.currentTime);g.gain.setValueAtTime(0.1,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+d);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d);}
+        
+        let prizeList = [], consolationMsgs = [], isSpinning = false;
         window.onload = () => { loadData(); };
-
-        // --- GAME LOGIC ---
-        let isSpinning = false;
 
         function startSpin() {
             if (isSpinning) return;
-            
-            // 1. หาของรางวัลที่ยังมีสต็อก (Qty > 0)
             const availablePrizes = prizeList.filter(p => p.qty > 0);
-            
-            // รวมรางวัลที่เหลือ กับ ข้อความปลอบใจ เพื่อใช้ในการแสดงผลตอนวิ่ง
-            // (ถ้าของรางวัลจริงหมด จะเหลือแค่ข้อความปลอบใจวิ่ง)
             let animationPool = [...availablePrizes.map(p => p.name), ...consolationMsgs];
+            if (animationPool.length === 0) { alert("ไม่มีข้อมูลรางวัล!"); return; }
             
-            // ถ้าไม่มีอะไรเลย (ของหมด + ลบข้อความปลอบใจเกลี้ยง)
-            if (animationPool.length === 0) { 
-                alert("ไม่มีข้อมูลรางวัล! กรุณาตั้งค่าก่อน"); 
-                return; 
-            }
-            
-            if (audioCtx.state === 'suspended') audioCtx.resume();
             isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('displayText').style.color = "#FF5252";
+            document.getElementById('displayBox').style.borderColor = "#FF5252";
+            document.getElementById('displayText').classList.remove('shake-anim');
 
-            const btn = document.getElementById('spinBtn');
-            const display = document.getElementById('displayText');
-            const box = document.getElementById('displayBox');
-            
-            btn.disabled = true;
-            btn.innerText = "กำลังสุ่ม...";
-            display.style.color = "#00A69C"; 
-            box.style.borderColor = "#00A69C";
-            box.style.boxShadow = "0 0 30px rgba(0, 166, 156, 0.3)";
-            display.classList.remove('shake-anim');
-
-            let speed = 50;
-            let counter = 0;
-            let maxLoops = 25 + Math.random() * 15;
-
+            let speed = 50, counter = 0, maxLoops = 25 + Math.random() * 15;
             function loop() {
-                // สุ่มโชว์ชื่อ (เพื่อความสวยงามขณะวิ่ง)
-                const showItem = animationPool[Math.floor(Math.random() * animationPool.length)];
-                display.innerText = showItem;
-                playTickSound();
-
+                document.getElementById('displayText').innerText = animationPool[Math.floor(Math.random() * animationPool.length)];
+                playTone(800, 'square', 0.05);
                 counter++;
-
-                if (counter < maxLoops) {
-                    setTimeout(loop, speed);
-                } else {
-                    if (speed < 600) {
-                        speed += 50;
-                        setTimeout(loop, speed);
-                    } else {
-                        // --- จบการสุ่ม ตัดสินผล ---
-                        decideResult(availablePrizes);
-                    }
-                }
+                if (counter < maxLoops) setTimeout(loop, speed);
+                else if (speed < 600) { speed += 50; setTimeout(loop, speed); }
+                else decideResult(availablePrizes);
             }
             loop();
         }
 
         function decideResult(availablePrizes) {
-            // Logic การสุ่มผลลัพธ์จริง
-            // 1. รวม Pool ทั้งหมดที่มีสิทธิ์ออก (รางวัลที่มีของ + ปลอบใจ)
-            // เราสามารถถ่วงน้ำหนักได้ตรงนี้ ถ้าอยากให้รางวัลออกยากง่าย
-            // เบื้องต้นใช้แบบ 1 สิทธิ์เท่ากัน (แต่ละชื่อรางวัลที่เหลือ + แต่ละข้อความปลอบใจ)
-            
             let finalPool = [];
-            
-            // ใส่ชื่อรางวัลลงใน Pool (1 ชื่อ ต่อ 1 สิทธิ์)
             availablePrizes.forEach(p => finalPool.push({type: 'prize', val: p.name}));
-            
-            // ใส่ข้อความปลอบใจลงใน Pool
             consolationMsgs.forEach(msg => finalPool.push({type: 'fail', val: msg}));
-
-            // ถ้าไม่มีอะไรให้แจกเลย (กรณีลบข้อความปลอบใจออกหมด และของรางวัลก็หมด)
-            if (finalPool.length === 0) {
-                endGame("ของรางวัลหมดแล้ว!", 'fail');
-                return;
-            }
-
-            // จิ้มผู้โชคดี
+            
+            if (finalPool.length === 0) { endGame("หมดแล้ว!", 'fail'); return; }
             const result = finalPool[Math.floor(Math.random() * finalPool.length)];
-
-            // ถ้าได้รางวัลจริง ต้องตัดสต็อก
-            if (result.type === 'prize') {
-                updateStock(result.val);
-            }
-
+            if (result.type === 'prize') updateStock(result.val);
             endGame(result.val, result.type);
         }
 
-        function updateStock(prizeName) {
-            // หา index ของรางวัลนั้น
-            const idx = prizeList.findIndex(p => p.name === prizeName);
-            if (idx !== -1 && prizeList[idx].qty > 0) {
-                prizeList[idx].qty -= 1; // ลดจำนวน
-                saveToLocalStorage(); // บันทึกทันที
-            }
+        function updateStock(name) {
+            const idx = prizeList.findIndex(p => p.name === name);
+            if (idx !== -1 && prizeList[idx].qty > 0) { prizeList[idx].qty--; saveToLocalStorage(); }
         }
 
         function endGame(text, type) {
             isSpinning = false;
-            const btn = document.getElementById('spinBtn');
             const display = document.getElementById('displayText');
-            const box = document.getElementById('displayBox');
-
             display.innerText = text;
-            btn.innerText = "เริ่มสุ่มรางวัล";
-            btn.disabled = false;
+            document.getElementById('spinBtn').disabled = false;
 
             if (type === 'prize') {
-                // WIN
-                playWinSound();
-                display.style.color = "#F39C12"; 
-                box.style.borderColor = "#F39C12";
-                box.style.boxShadow = "0 0 50px rgba(243, 156, 18, 0.6)";
-                confetti({
-                    particleCount: 200,
-                    spread: 100,
-                    origin: { y: 0.6 },
-                    colors: ['#F39C12', '#ffffff', '#e74c3c']
-                });
+                playTone(523, 'triangle', 0.4); setTimeout(()=>playTone(784,'triangle',0.4),200);
+                display.style.color = "#FFD700"; document.getElementById('displayBox').style.borderColor = "#FFD700";
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#FFD700', '#D32F2F', '#ffffff'] });
             } else {
-                // FAIL
-                playLoseSound();
-                display.style.color = "#bdc3c7"; 
-                box.style.borderColor = "#7f8c8d";
-                box.style.boxShadow = "none";
+                playTone(300, 'sawtooth', 0.5);
+                display.style.color = "#bdc3c7"; document.getElementById('displayBox').style.borderColor = "#7f8c8d";
                 display.classList.add('shake-anim');
             }
-            
-            display.style.transform = "scale(1.2)";
-            display.style.transition = "0.3s";
-            setTimeout(() => { display.style.transform = "scale(1)"; }, 500);
-        }
-
-        // --- ADMIN / SETTINGS LOGIC ---
-        function openSettings() {
-            // แปลง Object Array กลับเป็น Text: "Name : Qty"
-            const pText = prizeList.map(p => `${p.name} : ${p.qty}`).join("\n");
-            document.getElementById('prizeInput').value = pText;
-            document.getElementById('consolationInput').value = consolationMsgs.join("\n");
-            document.getElementById('settingModal').style.display = 'flex';
-        }
-
-        function closeSettings() {
-            document.getElementById('settingModal').style.display = 'none';
         }
 
         function saveData() {
-            const pInput = document.getElementById('prizeInput').value;
-            const cInput = document.getElementById('consolationInput').value;
-
-            // Parse Prize Input: "Name : Qty"
+            const pInput = document.getElementById('prizeInput').value.split("\n");
             prizeList = [];
-            const pLines = pInput.split("\n");
-            pLines.forEach(line => {
-                if(line.trim() !== "") {
-                    // แยกด้วยเครื่องหมาย :
-                    let parts = line.split(":");
-                    let name = parts[0].trim();
-                    let qty = 1; // default
-                    if (parts.length > 1) {
-                        qty = parseInt(parts[1].trim());
-                        if (isNaN(qty)) qty = 1;
-                    }
-                    prizeList.push({ name: name, qty: qty });
-                }
-            });
-
-            consolationMsgs = cInput.split("\n").map(s => s.trim()).filter(s => s !== "");
-
-            saveToLocalStorage();
-            alert("บันทึกข้อมูลเรียบร้อย!");
-            closeSettings();
+            pInput.forEach(line => { if(line.trim()){ let parts=line.split(":"); prizeList.push({name:parts[0].trim(), qty: parseInt(parts[1]||1)}); }});
+            consolationMsgs = document.getElementById('consolationInput').value.split("\n").filter(s=>s.trim());
+            saveToLocalStorage(); closeSettings();
         }
-
-        function saveToLocalStorage() {
-            const dataToSave = { prizes: prizeList, consolations: consolationMsgs };
-            localStorage.setItem('digitalExpoData_v2', JSON.stringify(dataToSave));
-        }
-
+        function saveToLocalStorage() { localStorage.setItem('digitalExpoData_v3', JSON.stringify({prizes: prizeList, consolations: consolationMsgs})); }
         function loadData() {
-            const saved = localStorage.getItem('digitalExpoData_v2');
-            if (saved) {
-                const data = JSON.parse(saved);
-                prizeList = data.prizes || [];
-                consolationMsgs = data.consolations || [];
-            } else {
-                // Default Data
-                prizeList = [
-                    { name: "Smartwatch", qty: 2 },
-                    { name: "Gift Voucher 500", qty: 5 },
-                    { name: "แก้วน้ำ", qty: 10 }
-                ];
-                consolationMsgs = ["ขอบคุณที่ร่วมสนุก", "โชคอาจจะยังไม่ดี", "พยายามใหม่อีกครั้ง"];
-            }
+            const data = JSON.parse(localStorage.getItem('digitalExpoData_v3') || '{"prizes":[], "consolations":[]}');
+            prizeList = data.prizes.length ? data.prizes : [{name:"Smartwatch",qty:2}];
+            consolationMsgs = data.consolations.length ? data.consolations : ["ขอบคุณที่ร่วมสนุก"];
         }
-
+        function openSettings() { 
+            document.getElementById('prizeInput').value = prizeList.map(p=>`${p.name}:${p.qty}`).join("\n");
+            document.getElementById('consolationInput').value = consolationMsgs.join("\n");
+            document.getElementById('settingModal').style.display = 'flex'; 
+        }
+        function closeSettings() { document.getElementById('settingModal').style.display = 'none'; }
     </script>
 </body>
 </html>
