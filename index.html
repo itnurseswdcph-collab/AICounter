@@ -5,171 +5,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Quick Big Win Dashboard</title>
 
+    <!-- 1. Google Fonts (ฟอนต์ Prompt) -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
     
+    <!-- 2. Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <!-- 3. FontAwesome (ไอคอน) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- 4. Odometer CSS (ธีมตัวเลขหมุน) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.7/themes/odometer-theme-default.min.css" />
 
     <style>
         body {
             font-family: 'Prompt', sans-serif;
             background-color: #f4f6f9;
+            overflow-x: hidden; /* ป้องกันสกรอลแนวนอน */
         }
 
-        /* ส่วน Header สีขาว */
+        /* --- Header Section --- */
         .top-header {
             background: white;
-            padding: 10px 0;
+            padding: 15px 0;
             border-bottom: 1px solid #ddd;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* จัดการขนาดโลโก้ */
+        .logo-img {
+            height: 60px; /* กำหนดความสูงมาตรฐาน */
+            width: auto;  /* ความกว้างปรับตามสัดส่วน */
+            object-fit: contain;
+            margin-right: 10px;
+            transition: transform 0.2s;
+        }
+        .logo-img:hover {
+            transform: scale(1.05); /* ขยายเล็กน้อยเมื่อเมาส์ชี้ */
+        }
+
+        /* Responsive Logo สำหรับมือถือ */
+        @media (max-width: 768px) {
+            .logo-img { height: 40px; }
+            .header-title { font-size: 1.2rem; }
+            .header-subtitle { font-size: 0.8rem; }
         }
         
         .header-title {
-            color: #b00d23; /* สีแดงเลือดหมูตามภาพ */
+            color: #b00d23;
             font-weight: 700;
             text-transform: uppercase;
             text-align: center;
+            margin: 0;
+            line-height: 1.2;
         }
         .header-subtitle {
-            color: #008080; /* สีเขียวอมฟ้า */
+            color: #008080;
             text-align: center;
             font-size: 0.9rem;
+            margin-top: 5px;
         }
 
-        /* ส่วน Navbar สีแดง */
+        /* --- Navbar Section --- */
         .main-navbar {
             background-color: #b00d23;
             padding: 15px 0;
+            white-space: nowrap;
+            overflow-x: auto; /* เลื่อนแนวนอนได้ในมือถือ */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 9;
         }
+        
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            min-width: max-content; /* ป้องกันปุ่มบีบตัว */
+            padding: 0 15px;
+        }
+
         .nav-btn {
             background: rgba(255,255,255,0.15);
-            color: white;
-            border: none;
+            color: white !important; /* บังคับสีขาว */
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 50px;
-            padding: 8px 20px;
-            margin: 0 5px;
-            transition: all 0.3s;
+            padding: 10px 25px;
+            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-        }
-        .nav-btn:hover, .nav-btn.active {
-            background: white;
-            color: #b00d23;
+            font-weight: 500;
+            cursor: pointer;
         }
 
-        /* --- CSS สำคัญ: การ์ดและลายน้ำ --- */
+        .nav-btn:hover, .nav-btn.active {
+            background: white;
+            color: #b00d23 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn i { font-size: 1.1em; }
+
+        /* --- Stat Cards & Watermark --- */
         .stat-card {
             background: white;
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            position: relative; /* สำคัญ: เพื่อให้ลายน้ำอ้างอิงตำแหน่งจากกรอบนี้ */
-            overflow: hidden;   /* สำคัญ: ตัดส่วนลายน้ำที่เกินออก */
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
             height: 100%;
             transition: transform 0.3s;
         }
         
-        /* แถบสีด้านบนการ์ดแต่ละใบ */
-        .border-top-teal { border-top: 5px solid #20c997; }
-        .border-top-red { border-top: 5px solid #dc3545; }
-        .border-top-blue { border-top: 5px solid #0d6efd; }
-
-        /* ไอคอนหลัก (ตัวเล็กตรงกลาง) */
-        .main-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
+        
+        .border-top-teal { border-top: 6px solid #20c997; }
+        .border-top-red { border-top: 6px solid #dc3545; }
+        .border-top-blue { border-top: 6px solid #0d6efd; }
+
+        .main-icon { font-size: 3.5rem; margin-bottom: 20px; }
         .icon-teal { color: #20c997; }
         .icon-red { color: #dc3545; }
         .icon-blue { color: #0d6efd; }
 
-        /* ตัวเลข Odometer */
+        /* Odometer Style Adjustment */
         .odometer {
-            font-size: 4rem;
-            font-weight: 700;
+            font-size: 4.5rem;
+            font-weight: 800;
             color: #333;
+            line-height: 1;
         }
 
-        /* --- ส่วนแก้ไขลายน้ำ (Watermark) --- */
+        /* --- Watermark Icon Fix --- */
         .watermark-icon {
-            position: absolute; /* ลอยอิสระ */
-            bottom: -10px;      /* ชิดล่าง (ปรับตำแหน่งตามชอบ) */
-            right: 10px;        /* ชิดขวา */
-            font-size: 8rem;    /* ขนาดใหญ่มาก */
-            opacity: 0.1;       /* จางๆ */
+            position: absolute;
+            bottom: -20px;
+            right: 10px;
+            font-size: 10rem; /* ใหญ่สะใจ */
+            opacity: 0.08;    /* จางลงอีกนิดเพื่อให้ข้อความเด่น */
             color: #000;
-            z-index: 0;         /* อยู่ชั้นล่างสุด */
-            pointer-events: none; /* คลิกทะลุได้ */
+            z-index: 0;
+            pointer-events: none;
+            transform: rotate(-15deg); /* เอียงนิดๆ ให้ดูมีศิลปะ */
         }
 
-        /* เนื้อหาในการ์ดต้องอยู่เหนือลายน้ำ */
         .card-content {
             position: relative;
             z-index: 2;
             padding: 40px 20px;
             text-align: center;
         }
+
+        /* Custom Scrollbar for Navbar */
+        .main-navbar::-webkit-scrollbar { height: 4px; }
+        .main-navbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
     </style>
 </head>
 <body>
 
+    <!-- 1. Header with Logos -->
     <header class="top-header">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="logos-left d-flex gap-2">
-                <img src="https://r8way.moph.go.th/r8way/img/R8NEWLOGO.png" alt="R8">
-                <img src="https://skko.moph.go.th/dward/document_file/skko/common_form_upload_file/20160322201256_410195252.png" alt="SKKO">
-                <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" alt="SKKO">
-            </div>
-            
-            <div class="header-center">
-                <h2 class="header-title m-0">EVENT QUICK BIG WIN หมอพร้อม SUPER APP 25 DEC 2025</h2>
-                <p class="header-subtitle m-0">บูธกิจกรรมรณรงค์และรับบริจาคอวัยวะ โรงพยาบาลสมเด็จพระยุพราชสว่างแดนดิน</p>
-            </div>
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Logo Group Left -->
+                <div class="col-lg-4 col-md-12 mb-3 mb-lg-0 text-center text-lg-start">
+                    <div class="d-flex justify-content-center justify-content-lg-start gap-2">
+                        <img src="https://r8way.moph.go.th/r8way/img/R8NEWLOGO.png" class="logo-img" alt="R8">
+                        <img src="https://skko.moph.go.th/dward/document_file/skko/common_form_upload_file/20160322201256_410195252.png" class="logo-img" alt="SKKO">
+                        <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img" alt="SWD">
+                    </div>
+                </div>
+                
+                <!-- Title Center -->
+                <div class="col-lg-4 col-md-12 mb-3 mb-lg-0">
+                    <h2 class="header-title">EVENT QUICK BIG WIN<br><span style="font-size: 0.8em; color:#555;">หมอพร้อม SUPER APP</span></h2>
+                    <p class="header-subtitle">บูธกิจกรรมรณรงค์และรับบริจาคอวัยวะ<br>โรงพยาบาลสมเด็จพระยุพราชสว่างแดนดิน</p>
+                </div>
 
-            <div class="logos-right">
-                <img src="https://mohpromt.moph.go.th/mpc/wp-content/uploads/2021/10/New_logo-mohpormt-01.png" alt="MorProm">
+                <!-- Logo Group Right -->
+                <div class="col-lg-4 col-md-12 text-center text-lg-end">
+                    <img src="https://mohpromt.moph.go.th/mpc/wp-content/uploads/2021/10/New_logo-mohpormt-01.png" class="logo-img" alt="MorProm" style="height: 55px;">
+                </div>
             </div>
         </div>
     </header>
 
-    <div class="main-navbar text-center">
-        <a href="#" class="nav-btn active"><i class="fa-solid fa-chart-line"></i> สรุปแดชบอร์ด</a>
-        <a href="#" class="nav-btn"><i class="fa-solid fa-video"></i> ระบบนับคน (AI)</a>
-        <a href="#" class="nav-btn"><i class="fa-solid fa-hand-holding-heart"></i> ลงทะเบียนบริจาคอวัยวะ</a>
-        <a href="#" class="nav-btn"><i class="fa-solid fa-gift"></i> ลุ้นรางวัล Big Win</a>
-        <a href="#" class="nav-btn"><i class="fa-solid fa-user-check"></i> Digital Hero Scan</a>
+    <!-- 2. Navigation Bar (แก้ไขให้คลิกง่ายขึ้น) -->
+    <div class="main-navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-btn active"><i class="fa-solid fa-chart-line"></i> สรุปแดชบอร์ด</a>
+            <a href="#" class="nav-btn"><i class="fa-solid fa-video"></i> ระบบนับคน (AI)</a>
+            <a href="#" class="nav-btn"><i class="fa-solid fa-hand-holding-heart"></i> ลงทะเบียนบริจาค</a>
+            <a href="#" class="nav-btn"><i class="fa-solid fa-gift"></i> ลุ้นรางวัล Big Win</a>
+            <a href="#" class="nav-btn"><i class="fa-solid fa-user-check"></i> Digital Hero Scan</a>
+        </div>
     </div>
 
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between mb-3">
-            <div class="text-muted">
-                <i class="fa-regular fa-clock"></i> อัปเดต: <span id="current-time">12:00:00</span>
+    <!-- 3. Dashboard Content -->
+    <div class="container mt-5 mb-5">
+        <!-- Control Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+            <div class="text-muted fw-bold">
+                <i class="fa-regular fa-clock text-danger"></i> อัปเดตล่าสุด: <span id="current-time">--:--:--</span>
             </div>
-            <button class="btn btn-outline-info btn-sm rounded-pill px-3" onclick="location.reload()">
-                <i class="fa-solid fa-rotate-right"></i> รีเฟรช
+            <button class="btn btn-outline-danger rounded-pill px-4" onclick="reloadDashboard()">
+                <i class="fa-solid fa-rotate-right me-1"></i> รีเฟรชข้อมูล
             </button>
         </div>
 
         <div class="row g-4">
-            
+            <!-- Card 1: ผู้เข้าชม -->
             <div class="col-md-4">
                 <div class="stat-card border-top-teal">
+                    <!-- Watermark Icon (พื้นหลัง) -->
                     <i class="fa-solid fa-users watermark-icon"></i>
                     
                     <div class="card-content">
                         <i class="fa-solid fa-users main-icon icon-teal"></i>
                         <div class="d-block mb-2">
+                            <!-- Odometer Number -->
                             <div id="visitor-count" class="odometer">0</div>
                         </div>
-                        <h5 class="text-muted">จำนวนผู้เข้าชมบูธ</h5>
+                        <h5 class="text-secondary">จำนวนผู้เข้าชมบูธ (คน)</h5>
                     </div>
                 </div>
             </div>
 
+            <!-- Card 2: บริจาคอวัยวะ -->
             <div class="col-md-4">
                 <div class="stat-card border-top-red">
                     <i class="fa-solid fa-heart-pulse watermark-icon"></i>
@@ -179,11 +248,12 @@
                         <div class="d-block mb-2">
                             <div id="organ-count" class="odometer">0</div>
                         </div>
-                        <h5 class="text-muted">จำนวนผู้ลงทะเบียนบริจาคอวัยวะ</h5>
+                        <h5 class="text-secondary">ลงทะเบียนบริจาคอวัยวะ (ราย)</h5>
                     </div>
                 </div>
             </div>
 
+            <!-- Card 3: บริจาคดวงตา -->
             <div class="col-md-4">
                 <div class="stat-card border-top-blue">
                     <i class="fa-solid fa-eye watermark-icon"></i>
@@ -193,44 +263,69 @@
                         <div class="d-block mb-2">
                             <div id="eye-count" class="odometer">0</div>
                         </div>
-                        <h5 class="text-muted">จำนวนผู้ลงทะเบียนบริจาคดวงตา</h5>
+                        <h5 class="text-secondary">ลงทะเบียนบริจาคดวงตา (ราย)</h5>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
+    <!-- Footer Credit -->
+    <footer class="text-center text-muted py-4 mt-4" style="font-size: 0.8rem;">
+        &copy; 2025 IT Nurses & Public Health Collaboration. All rights reserved.
+    </footer>
+
+    <!-- Scripts Section -->
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Odometer JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.7/odometer.min.js"></script>
     
+    <!-- Custom Logic -->
     <script>
-        // ตั้งค่า Odometer เบื้องต้น
+        // 1. ตั้งค่า Odometer
         window.odometerOptions = {
-            format: '(,ddd)', // รูปแบบตัวเลข มีลูกน้ำคั่น
-            duration: 2000,   // ระยะเวลาหมุน (ms)
+            auto: false, // ปิด auto เพื่อควบคุมเอง
+            format: '(,ddd)', 
+            duration: 2000, 
+            theme: 'default'
         };
 
-        // ฟังก์ชันจำลองการโหลดข้อมูล (หรือเอาไปใช้ตอน Fetch Data จริง)
-        document.addEventListener("DOMContentLoaded", function() {
+        // 2. ฟังก์ชันโหลดข้อมูล (จำลอง)
+        function loadData() {
+            // สมมติค่าตัวเลข (เปลี่ยนเลขตรงนี้เพื่อทดสอบ)
+            const visitors = 1250;
+            const organDonors = 89;
+            const eyeDonors = 74;
+
+            // สั่งให้ Odometer ทำงาน
+            document.getElementById('visitor-count').innerHTML = visitors;
+            document.getElementById('organ-count').innerHTML = organDonors;
+            document.getElementById('eye-count').innerHTML = eyeDonors;
+        }
+
+        // 3. ฟังก์ชันรีโหลดหน้า (สำหรับปุ่ม Refresh)
+        function reloadDashboard() {
+            // รีเซ็ตเป็น 0 ก่อนเพื่อให้เห็นการหมุนใหม่
+            document.getElementById('visitor-count').innerHTML = 0;
+            document.getElementById('organ-count').innerHTML = 0;
+            document.getElementById('eye-count').innerHTML = 0;
             
-            // อัปเดตเวลาปัจจุบัน
-            const updateTime = () => {
+            setTimeout(loadData, 500); // ดีเลย์นิดนึงแล้วโหลดใหม่
+        }
+
+        // 4. เริ่มทำงานเมื่อหน้าเว็บโหลดเสร็จ
+        document.addEventListener("DOMContentLoaded", function() {
+            // เริ่มต้นเวลา
+            setInterval(() => {
                 const now = new Date();
                 document.getElementById('current-time').innerText = now.toLocaleTimeString('th-TH');
-            };
-            updateTime();
-            setInterval(updateTime, 1000);
+            }, 1000);
 
-            // *** ส่วนสำคัญ: สั่งให้ตัวเลขหมุน ***
-            // setTimeout ใช้จำลองดีเลย์นิดหน่อยเพื่อให้เห็น Effect ตอนโหลดเสร็จ
-            setTimeout(function(){
-                document.getElementById('visitor-count').innerHTML = 10; // ใส่ค่าตัวแปรจริงตรงนี้
-                document.getElementById('organ-count').innerHTML = 7;
-                document.getElementById('eye-count').innerHTML = 7;
-            }, 500); 
+            // เริ่มต้นโหลดข้อมูล (ดีเลย์ 0.5วิ เพื่อความสวยงาม)
+            setTimeout(loadData, 500);
         });
     </script>
-
 </body>
 </html>
-
