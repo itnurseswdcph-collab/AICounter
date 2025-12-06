@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Quick Big Win Dashboard</title>
 
-    <!-- 1. Google Fonts (ฟอนต์ Prompt) -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- 1. Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <!-- 2. Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- 3. FontAwesome (ไอคอน) -->
+    <!-- 3. FontAwesome & Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-    <!-- 4. Odometer CSS (ธีมตัวเลขหมุน) -->
+    <!-- 4. Odometer CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.7/themes/odometer-theme-default.min.css" />
 
     <style>
@@ -27,100 +28,20 @@
             min-height: 100vh;
         }
 
-        /* --- Header Section --- */
-        .top-header {
-            background: white;
-            padding: 15px 0;
-            border-bottom: 1px solid #ddd;
-            position: relative;
-            z-index: 10;
-        }
+        /* --- Header & Navbar --- */
+        .top-header { background: white; padding: 15px 0; border-bottom: 1px solid #ddd; z-index: 10; }
+        .logo-img { height: 60px; width: auto; object-fit: contain; margin-right: 10px; transition: transform 0.2s; }
+        .logo-img:hover { transform: scale(1.05); }
+        .header-title { color: #b00d23; font-weight: 700; text-transform: uppercase; text-align: center; margin: 0; line-height: 1.2; }
+        .header-subtitle { color: #008080; text-align: center; font-size: 0.9rem; margin-top: 5px; }
 
-        .logo-img {
-            height: 60px;
-            width: auto;
-            object-fit: contain;
-            margin-right: 10px;
-            transition: transform 0.2s;
-        }
-        .logo-img:hover {
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 768px) {
-            .logo-img { height: 40px; }
-            .header-title { font-size: 1.2rem; }
-            .header-subtitle { font-size: 0.8rem; }
-        }
-        
-        .header-title {
-            color: #b00d23;
-            font-weight: 700;
-            text-transform: uppercase;
-            text-align: center;
-            margin: 0;
-            line-height: 1.2;
-        }
-        .header-subtitle {
-            color: #008080;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        /* --- Navbar Section --- */
-        .main-navbar {
-            background-color: #b00d23;
-            padding: 15px 0;
-            white-space: nowrap;
-            overflow-x: auto;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 9;
-        }
-        
-        .nav-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            min-width: max-content;
-            padding: 0 15px;
-        }
-
-        .nav-btn {
-            background: rgba(255,255,255,0.15);
-            color: white !important;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50px;
-            padding: 10px 25px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .nav-btn:hover, .nav-btn.active {
-            background: white;
-            color: #b00d23 !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
+        .main-navbar { background-color: #b00d23; padding: 15px 0; white-space: nowrap; overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); z-index: 9; }
+        .nav-container { display: flex; justify-content: center; gap: 10px; min-width: max-content; padding: 0 15px; }
+        .nav-btn { background: rgba(255,255,255,0.15); color: white !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 10px 25px; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+        .nav-btn:hover, .nav-btn.active { background: white; color: #b00d23 !important; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
         /* --- Stat Cards --- */
-        .stat-card {
-            background: white;
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-            height: 100%;
-            transition: transform 0.3s;
-        }
-        
+        .stat-card { background: white; border: none; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative; overflow: hidden; height: 100%; transition: transform 0.3s; }
         .stat-card:hover { transform: translateY(-5px); }
         
         .border-top-teal { border-top: 6px solid #20c997; }
@@ -132,66 +53,86 @@
         .icon-red { color: #dc3545; }
         .icon-blue { color: #0d6efd; }
 
-        .odometer {
-            font-size: 4.5rem;
-            font-weight: 800;
-            color: #333;
-            line-height: 1;
-        }
+        .odometer { font-size: 4.5rem; font-weight: 800; color: #333; line-height: 1; }
+        .watermark-icon { position: absolute; bottom: -20px; right: 10px; font-size: 10rem; opacity: 0.08; color: #000; z-index: 0; pointer-events: none; transform: rotate(-15deg); }
+        .card-content { position: relative; z-index: 2; padding: 40px 20px; text-align: center; }
 
-        .watermark-icon {
-            position: absolute;
-            bottom: -20px;
-            right: 10px;
-            font-size: 10rem;
-            opacity: 0.08;
-            color: #000;
-            z-index: 0;
-            pointer-events: none;
-            transform: rotate(-15deg);
-        }
+        /* --- Footer --- */
+        .custom-footer { margin-top: auto; background-color: #b00d23; color: white; padding: 30px 0 15px 0; font-size: 0.9rem; }
+        .footer-link { color: white; text-decoration: none; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .footer-link:hover { opacity: 0.8; color: #ffd700; }
+        .footer-divider { margin: 0 10px; opacity: 0.5; }
+        .copyright-text { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; margin-top: 20px; font-size: 0.8rem; opacity: 0.9; }
 
-        .card-content {
-            position: relative;
-            z-index: 2;
-            padding: 40px 20px;
+        /* --- HERO FOUND POPUP (แจ้งเตือนผู้บริจาคใหม่) --- */
+        .found-modal {
+            display: none; /* ซ่อนไว้ก่อน */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.95); /* พื้นหลังดำโปร่งแสง */
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
             text-align: center;
         }
+        
+        .found-icon-container { position: relative; margin-bottom: 20px; }
 
-        /* --- Footer Styles --- */
-        .custom-footer {
-            margin-top: auto;
-            background-color: #b00d23; /* พื้นหลังสีแดง */
-            color: white;
-            padding: 30px 0 15px 0;
-            font-size: 0.9rem;
-        }
-        .footer-link {
-            color: white;
-            text-decoration: none;
-            transition: opacity 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .footer-link:hover {
-            opacity: 0.8;
+        /* ไอคอนเหรียญทอง */
+        .found-medal {
+            font-size: 12rem;
             color: #ffd700;
-        }
-        .footer-divider {
-            margin: 0 10px;
-            opacity: 0.5;
-        }
-        .copyright-text {
-            border-top: 1px solid rgba(255,255,255,0.2);
-            padding-top: 15px;
-            margin-top: 20px;
-            font-size: 0.8rem;
-            opacity: 0.9;
+            filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8));
+            animation: pulse 1s infinite; /* เต้นตุบๆ */
         }
 
-        .main-navbar::-webkit-scrollbar { height: 4px; }
-        .main-navbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        .found-title {
+            color: #ff6b6b;
+            font-size: 6rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            text-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+            animation: rubberBand 1s; /* เด้งดึ๋ง */
+        }
+
+        .found-subtitle {
+            font-size: 2.5rem;
+            color: #20c997;
+            font-weight: bold;
+            margin-top: 10px;
+            text-shadow: 0 0 10px rgba(32, 201, 151, 0.5);
+        }
+        
+        .found-desc {
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
+        .dismiss-btn {
+            margin-top: 40px;
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .dismiss-btn:hover { background: white; color: black; }
+
+        /* ปุ่มเปิดเสียง (เผื่อ Browser บล็อกเสียงอัตโนมัติ) */
+        .sound-toggle {
+            position: fixed; bottom: 20px; right: 20px; 
+            background: rgba(0,0,0,0.5); color: white; 
+            border: none; border-radius: 50%; width: 50px; height: 50px;
+            z-index: 100; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -200,19 +141,17 @@
     <header class="top-header">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-4 col-md-12 mb-3 mb-lg-0 text-center text-lg-start">
+                <div class="col-lg-4 col-md-12 text-center text-lg-start mb-2 mb-lg-0">
                     <div class="d-flex justify-content-center justify-content-lg-start gap-2">
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDH91BizHKqi00_QqEcCQ76jrBxJrRGTthfQ&s" class="logo-img" alt="R8">
                         <img src="https://skko.moph.go.th/dward/document_file/skko/common_form_upload_file/20160322201256_410195252.png" class="logo-img" alt="SKKO">
                         <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img" alt="SWD">
                     </div>
                 </div>
-                
-                <div class="col-lg-4 col-md-12 mb-3 mb-lg-0">
+                <div class="col-lg-4 col-md-12 text-center mb-2 mb-lg-0">
                     <h2 class="header-title">EVENT QUICK BIG WIN<br><span style="font-size: 0.8em; color:#555;">หมอพร้อม SUPER APP</span></h2>
-                    <p class="header-subtitle">บูธกิจกรรมรณรงค์และรับบริจาคอวัยวะ รพร.สว่างแดนดิน <br> 24 ธันวาคม 2568</p>
+                    <p class="header-subtitle">บูธกิจกรรมรณรงค์และรับบริจาคอวัยวะ โรงพยาบาลสมเด็จพระยุพราชสว่างแดนดิน <br>24 ธันวาคม 2568</p>
                 </div>
-
                 <div class="col-lg-4 col-md-12 text-center text-lg-end">
                     <img src="https://mohpromt.moph.go.th/mpc/wp-content/uploads/2021/10/New_logo-mohpormt-01.png" class="logo-img" alt="MorProm" style="height: 55px;">
                 </div>
@@ -220,28 +159,24 @@
         </div>
     </header>
 
-    <!-- Navbar: เชื่อมลิงก์ไปยังไฟล์ต่างๆ -->
+    <!-- Navbar -->
     <div class="main-navbar">
         <div class="nav-container">
-            <!-- เชื่อมลิงก์หน้าแรก -->
             <a href="index.html" class="nav-btn active"><i class="fa-solid fa-chart-line"></i> สรุปแดชบอร์ด</a>
-            <!-- เชื่อมลิงก์ AI Cam -->
             <a href="ai_cam.html" class="nav-btn"><i class="fa-solid fa-video"></i> ระบบนับคน (AI)</a>
-            <!-- ลิงก์บริจาค (ถ้ามีไฟล์ให้ใส่ชื่อไฟล์ แทน #) -->
-            <a href="#" class="nav-btn"><i class="fa-solid fa-hand-holding-heart"></i> ลงทะเบียนบริจาค</a>
-            <!-- เชื่อมลิงก์ Lucky Game -->
+            <a href="donation.html" class="nav-btn"><i class="fa-solid fa-hand-holding-heart"></i> ลงทะเบียนบริจาค</a>
             <a href="lucky_game.html" class="nav-btn"><i class="fa-solid fa-gift"></i> ลุ้นรางวัล Big Win</a>
-            <!-- เชื่อมลิงก์ Hero Scan -->
             <a href="hero_scan.html" class="nav-btn"><i class="fa-solid fa-user-check"></i> Digital Hero Scan</a>
         </div>
     </div>
 
-    <!-- Dashboard Content -->
+    <!-- Main Content -->
     <div class="container mt-5 mb-5">
+        <!-- Control Bar -->
         <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
             <div class="text-muted fw-bold">
                 <i class="fa-regular fa-clock text-danger"></i> อัปเดตล่าสุด: <span id="current-time">--:--:--</span>
-                <span id="api-status" class="badge bg-secondary ms-2">Waiting for Data...</span>
+                <span id="api-status" class="badge bg-secondary ms-2">Connecting...</span>
             </div>
             <button class="btn btn-outline-danger rounded-pill px-4" onclick="fetchData()">
                 <i class="fa-solid fa-rotate-right me-1"></i> รีเฟรชข้อมูล
@@ -293,7 +228,18 @@
         </div>
     </div>
 
-    <!-- Footer แบบใหม่ตามคำขอ -->
+    <!-- POPUP HERO FOUND (หน้าต่างแจ้งเตือนฮีโร่) -->
+    <div id="heroFoundModal" class="found-modal animate__animated">
+        <div class="found-icon-container">
+            <i class="fa-solid fa-medal found-medal"></i>
+        </div>
+        <h1 class="found-title">HERO FOUND!</h1>
+        <h2 class="found-subtitle">พบฮีโร่ผู้ให้คนใหม่</h2>
+        <p class="found-desc">ขอบคุณสำหรับการแบ่งปันที่ยิ่งใหญ่</p>
+        <button class="dismiss-btn" onclick="closeFoundModal()">ปิดหน้าต่าง (Close)</button>
+    </div>
+
+    <!-- Footer -->
     <footer class="custom-footer text-center">
         <div class="container">
             <div class="row justify-content-center gy-3 mb-3">
@@ -317,62 +263,157 @@
                     </span>
                 </div>
             </div>
-            
             <div class="copyright-text">
                 &copy; 2025 IT Nurses SWDCPH l Natnainthorn. All rights reserved.
             </div>
         </div>
     </footer>
 
+    <!-- Audio Element (เสียง Effect) -->
+    <audio id="heroSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
+
+    <!-- ปุ่มเปิดเสียง (ซ่อนไว้กดเองเผื่อ browser block) -->
+    <button id="soundToggle" class="sound-toggle" onclick="enableSound()" title="เปิดเสียง">
+        <i class="fa-solid fa-volume-xmark" id="soundIcon"></i>
+    </button>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.7/odometer.min.js"></script>
+    <!-- Library จุดพลุ -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
         // 1. ตั้งค่า Odometer
-        window.odometerOptions = {
-            auto: false,
-            format: '(,ddd)',
-            duration: 2000,
-            theme: 'default'
-        };
+        window.odometerOptions = { auto: false, format: '(,ddd)', duration: 2000, theme: 'default' };
 
-        // 2. URL ของ Google Apps Script (API)
+        // 2. ลิงก์ Script Google Sheet
         const API_URL = 'https://script.google.com/macros/s/AKfycbyjbm3yoBaly8pVeXKz1QTpieUe_KjjNWpatAgq_mx3jtkX7zs6vFKm8DXzBCkxNrJm/exec';
+        
+        // 3. ตัวแปรเก็บค่าเก่า (ไว้เทียบเพื่อหาฮีโร่ใหม่)
+        let lastData = { organ: 0, eye: 0 };
+        let isFirstLoad = true;
+        let soundEnabled = false;
 
-        // 3. ฟังก์ชันดึงข้อมูล (Fetch Data)
+        // ฟังก์ชันเปิดเสียง (User Interaction Requirement)
+        function enableSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundIcon');
+            const sound = document.getElementById('heroSound');
+            
+            if(soundEnabled) {
+                btn.className = 'fa-solid fa-volume-high';
+                // ลองเล่นเสียงเบาๆ เพื่อปลดล็อค Browser Policy
+                sound.volume = 0;
+                sound.play().then(() => {
+                    sound.pause();
+                    sound.volume = 1;
+                }).catch(e => console.log("Audio unlock failed"));
+            } else {
+                btn.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+
+        // 4. ฟังก์ชันดึงข้อมูล
         async function fetchData() {
             const statusBadge = document.getElementById('api-status');
             
             try {
-                // เรียกข้อมูลจาก API
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Network error');
                 
                 const data = await response.json();
-                
-                // แสดงสถานะว่าเชื่อมต่อสำเร็จ
                 statusBadge.className = 'badge bg-success ms-2';
                 statusBadge.innerText = 'Online (Real-time)';
 
-                // อัปเดตข้อมูลลงหน้าเว็บ
-                // หมายเหตุ: ต้องตรวจสอบว่า key ใน JSON ของคุณชื่ออะไร
-                // สมมติว่าเป็น visitor, organ, eye ถ้าไม่ใช่ให้แก้ตรง data.xxx นี้ครับ
-                if(data.visitor !== undefined) document.getElementById('visitor-count').innerHTML = data.visitor;
-                if(data.organ !== undefined) document.getElementById('organ-count').innerHTML = data.organ;
-                if(data.eye !== undefined) document.getElementById('eye-count').innerHTML = data.eye;
-                
-                // ถ้า API ส่งมาเป็น key อื่น ให้ใช้ console.log(data) ดูโครงสร้างก่อน
-                console.log("Fetched Data:", data);
+                // ค่าปัจจุบันจาก API
+                const currentVisitor = data.visitor || 0;
+                const currentOrgan = data.organ || 0;
+                const currentEye = data.eye || 0;
+
+                // อัปเดตตัวเลขหน้าเว็บ
+                document.getElementById('visitor-count').innerHTML = currentVisitor;
+                document.getElementById('organ-count').innerHTML = currentOrgan;
+                document.getElementById('eye-count').innerHTML = currentEye;
+
+                // *** LOGIC ตรวจจับฮีโร่ใหม่ ***
+                if (!isFirstLoad) {
+                    // ถ้าตัวเลขใหม่ มากกว่า ตัวเลขเก่า (แสดงว่ามีคนเพิ่งกดบริจาค)
+                    if (currentOrgan > lastData.organ || currentEye > lastData.eye) {
+                        triggerHeroFound(); // เรียกใช้งาน Popup
+                    }
+                }
+
+                // อัปเดตค่าเก่าเก็บไว้เทียบรอบหน้า
+                lastData.organ = currentOrgan;
+                lastData.eye = currentEye;
+                isFirstLoad = false;
 
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error:', error);
                 statusBadge.className = 'badge bg-danger ms-2';
                 statusBadge.innerText = 'Connection Error';
             }
         }
 
-        // 4. ทำงานเมื่อเปิดหน้าเว็บ
+        // 5. ฟังก์ชันแสดง Popup + พลุ + เสียง
+        function triggerHeroFound() {
+            const modal = document.getElementById('heroFoundModal');
+            const sound = document.getElementById('heroSound');
+            
+            // แสดง Modal
+            modal.style.display = 'flex';
+            modal.classList.add('animate__fadeIn'); // ใส่ Effect
+
+            // เล่นเสียง (ถ้าเปิดเสียงไว้)
+            if (soundEnabled || true) { // บังคับลองเล่นดูก่อน
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Autoplay blocked, click sound icon"));
+            }
+
+            // จุดพลุ (Confetti Fireworks)
+            const duration = 5000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                // พลุซ้าย
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ffd700', '#ff6b6b', '#ffffff'] 
+                });
+                // พลุขวา
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#20c997', '#0d6efd', '#ffffff']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+
+            // ตั้งเวลาปิดอัตโนมัติ 10 วินาที
+            setTimeout(closeFoundModal, 10000);
+        }
+
+        // ฟังก์ชันปิด Popup
+        function closeFoundModal() {
+            const modal = document.getElementById('heroFoundModal');
+            modal.classList.remove('animate__fadeIn');
+            modal.classList.add('animate__fadeOut');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.classList.remove('animate__fadeOut');
+            }, 500);
+        }
+
+        // เริ่มทำงานเมื่อโหลดหน้าเว็บ
         document.addEventListener("DOMContentLoaded", function() {
             // นาฬิกา
             setInterval(() => {
@@ -380,14 +421,9 @@
                 document.getElementById('current-time').innerText = now.toLocaleTimeString('th-TH');
             }, 1000);
 
-            // เรียกข้อมูลครั้งแรกทันที
-            fetchData();
-
-            // ตั้งเวลาให้ดึงข้อมูลใหม่ทุกๆ 5 วินาที (Real-time update)
-            setInterval(fetchData, 5000); 
+            fetchData(); // ดึงข้อมูลครั้งแรก
+            setInterval(fetchData, 3000); // เช็คข้อมูลใหม่ทุก 3 วินาที
         });
     </script>
 </body>
 </html>
-
-
