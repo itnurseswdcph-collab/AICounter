@@ -23,6 +23,8 @@
         .top-header { background: white; padding: 15px 0; border-bottom: 1px solid #ddd; }
         .header-title { color: #b00d23; font-weight: 700; text-align: center; margin: 0; }
         .header-subtitle { color: #008080; text-align: center; font-size: 0.8rem; }
+        .logo-img { height: 60px; width: auto; object-fit: contain; margin-right: 10px; transition: transform 0.2s; }
+        .logo-img:hover { transform: scale(1.05); }
         
         .main-navbar { background-color: #b00d23; padding: 15px 0; white-space: nowrap; overflow-x: auto; }
         .nav-btn { color: white !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 8px 20px; text-decoration: none; margin: 0 5px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
@@ -135,9 +137,23 @@
 <body>
 
     <header class="top-header">
-        <div class="container text-center">
-            <h2 class="header-title">EVENT QUICK BIG WIN</h2>
-            <p class="header-subtitle mb-0">ลงทะเบียนเป็นผู้ให้...สร้างกุศลที่ยิ่งใหญ่</p>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-4 col-md-12 text-center text-lg-start mb-2 mb-lg-0">
+                    <div class="d-flex justify-content-center justify-content-lg-start gap-2">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDH91BizHKqi00_QqEcCQ76jrBxJrRGTthfQ&s" class="logo-img" alt="R8">
+                        <img src="https://skko.moph.go.th/dward/document_file/skko/common_form_upload_file/20160322201256_410195252.png" class="logo-img" alt="SKKO">
+                        <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img" alt="SWD">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-12 text-center mb-2 mb-lg-0">
+                    <h2 class="header-title">EVENT QUICK BIG WIN<br><span style="font-size: 0.8em; color:#555;">หมอพร้อม SUPER APP</span></h2>
+                    <p class="header-subtitle">บูธกิจกรรมรณรงค์และรับบริจาคอวัยวะ โรงพยาบาลสมเด็จพระยุพราชสว่างแดนดิน <br>24 ธันวาคม 2568</p>
+                </div>
+                <div class="col-lg-4 col-md-12 text-center text-lg-end">
+                    <img src="https://mohpromt.moph.go.th/mpc/wp-content/uploads/2021/10/New_logo-mohpormt-01.png" class="logo-img" alt="MorProm" style="height: 55px;">
+                </div>
+            </div>
         </div>
     </header>
 
