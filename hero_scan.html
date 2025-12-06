@@ -9,224 +9,26 @@
     
     <style>
         :root {
-            --primary: #00A69C; /* หมอพร้อม Green */
-            --secondary: #00566B;
-            --accent: #F39C12;  /* Gold */
-            --danger: #e74c3c;
-            --text-glow: 0 0 10px rgba(0, 166, 156, 0.8);
-            --hud-bg: rgba(0, 10, 10, 0.9);
-        }
+    --primary: #D32F2F; /* เปลี่ยนเป็นแดงกาชาด */
+    --secondary: #B71C1C;
+    --accent: #FFD700;  /* สีทอง Hero */
+    --danger: #e74c3c;
+    --text-glow: 0 0 10px rgba(211, 47, 47, 0.8); /* แสงนีออนแดง */
+    --hud-bg: rgba(20, 0, 0, 0.9); /* พื้นหลังดำอมแดง */
+}
 
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: black;
-            font-family: 'Prompt', sans-serif;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-        }
+/* ปรับสีปุ่มให้เป็นแดง */
+.btn-action {
+    background: linear-gradient(135deg, #D32F2F, #B71C1C);
+    box-shadow: 0 0 15px rgba(211, 47, 47, 0.5);
+}
+.btn-action:hover { background: linear-gradient(135deg, #FF5252, #D32F2F); }
 
-        /* --- CAMERA LAYER --- */
-        #camera-feed {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            z-index: 0;
-            filter: grayscale(80%) contrast(1.2) brightness(0.6);
-        }
-
-        /* --- UI LAYER --- */
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        /* HUD ELEMENTS */
-        .hud-header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            margin-bottom: 20px;
-            background: linear-gradient(to bottom, var(--hud-bg), transparent);
-            position: sticky; top: 0; z-index: 20;
-        }
-        .hud-logo img { height: 40px; }
-        .hud-status { 
-            font-size: 0.8rem; 
-            color: var(--primary); 
-            border: 1px solid var(--primary); 
-            padding: 5px 10px; 
-            border-radius: 20px;
-            text-shadow: var(--text-glow);
-            background: rgba(0,0,0,0.5);
-        }
-
-        /* CARD STYLE FOR FORMS */
-        .glass-card {
-            background: rgba(0, 20, 20, 0.85);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid var(--primary);
-            box-shadow: 0 0 20px rgba(0, 166, 156, 0.2);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            animation: fadeIn 0.5s;
-            margin-bottom: 20px;
-        }
-
-        h2 { color: var(--primary); margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
-        label { display: block; text-align: left; margin: 10px 0 5px; color: #ccc; font-size: 0.9rem; }
-        
-        input, select {
-            width: 100%;
-            padding: 10px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid #555;
-            color: white;
-            border-radius: 5px;
-            font-family: 'Prompt', sans-serif;
-            box-sizing: border-box;
-        }
-        input:focus, select:focus { outline: none; border-color: var(--primary); }
-
-        /* QUIZ BUTTONS */
-        .quiz-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .quiz-btn {
-            flex: 1;
-            padding: 10px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid #555;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .quiz-btn.selected {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: black;
-            font-weight: bold;
-        }
-
-        .btn-action {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            border-radius: 50px;
-            margin-top: 20px;
-            cursor: pointer;
-            font-family: 'Prompt', sans-serif;
-            font-weight: bold;
-            box-shadow: 0 0 15px var(--primary);
-            transition: 0.3s;
-            width: 100%;
-        }
-        .btn-action:hover { transform: scale(1.02); background: #00d2c6; }
-
-        /* ADVICE BOX */
-        .advice-box {
-            text-align: left;
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-        .advice-item { margin-bottom: 8px; display: flex; gap: 10px; }
-        .advice-icon { color: var(--accent); width: 20px; text-align: center; }
-
-        /* SCANNER OVERLAY */
-        #scanner-overlay {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px; height: 500px;
-            display: none;
-            pointer-events: none;
-            z-index: 15;
-        }
-        .human-silhouette {
-            width: 100%; height: 100%;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/800px-User_icon_2.svg.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            filter: invert(47%) sepia(87%) saturate(1633%) hue-rotate(139deg) brightness(96%) contrast(101%);
-            opacity: 0.5;
-        }
-        .scan-line {
-            position: absolute;
-            top: 0; left: -10%;
-            width: 120%; height: 5px;
-            background: var(--primary);
-            box-shadow: 0 0 20px var(--primary), 0 0 40px white;
-            animation: scanMove 3s ease-in-out infinite;
-            display: none;
-        }
-        @keyframes scanMove {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* ORGANS */
-        .organ-point {
-            position: absolute;
-            width: 100px; left: 50%; transform: translateX(-50%) scale(0);
-            display: flex; align-items: center; justify-content: center; flex-direction: column; transition: 0.5s;
-        }
-        .dot { width: 15px; height: 15px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); margin-bottom: 5px; }
-        .label { background: rgba(0,0,0,0.8); border: 1px solid var(--accent); color: var(--accent); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; white-space: nowrap; }
-        
-        #eye-point { top: 8%; }
-        #lung-point { top: 25%; }
-        #heart-point { top: 30%; left: 55%; }
-        #liver-point { top: 40%; }
-        #kidney-point { top: 48%; }
-        .show-organ { transform: translateX(-50%) scale(1); }
-
-        /* RESULT SCREEN */
-        #result-screen {
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 50; padding: 20px; box-sizing: border-box;
-        }
-        .hero-badge { font-size: 5rem; color: var(--accent); text-shadow: 0 0 30px var(--accent); animation: pulse 2s infinite; }
-        .qr-box { background: white; padding: 10px; border-radius: 10px; margin: 15px 0; }
-        .qr-box img { width: 120px; height: 120px; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* DATA STREAM */
-        .data-stream { position: absolute; right: 10px; top: 80px; font-family: monospace; color: rgba(0, 166, 156, 0.5); font-size: 0.7rem; text-align: right; pointer-events: none; }
-
-        /* HIDE SECTION CLASS */
-        .hidden { display: none !important; }
+/* ปรับสีเส้นสแกน */
+.scan-line {
+    background: var(--primary);
+    box-shadow: 0 0 20px var(--primary), 0 0 40px red;
+}
 
     </style>
 </head>
