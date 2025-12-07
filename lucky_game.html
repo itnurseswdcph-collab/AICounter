@@ -446,8 +446,8 @@
                 if (result.status === 'success') {
                     alert("เพิ่มรางวัลสำเร็จ!");
                     document.getElementById('addRewardForm').reset();
-                    closeModal('adminModal');
-                    initGame(); // โหลดรายชื่อใหม่
+                    // closeModal('adminModal'); // ไม่ปิดอัตโนมัติแล้ว ตามคำขอ
+                    initGame(); // โหลดรายชื่อใหม่ในเบื้องหลัง
                 } else {
                     alert("Error: " + result.message);
                 }
