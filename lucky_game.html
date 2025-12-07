@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Big Win Lucky Draw</title>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Digital Big Win - Scanner</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         :root {
-            /* Theme: Red Gala */
-            --primary: #FF5252;
-            --secondary: #D32F2F;
-            --accent: #FFD700; /* Gold */
-            --dark-bg: #1a0505; /* Blackish Red */
+            --primary: #FF5252;   /* แดงนีออน */
+            --secondary: #b00d23; /* แดงเลือดหมู */
+            --accent: #FFD700;    /* ทอง */
+            --dark-bg: #1a0000;
             --neon-glow: 0 0 10px var(--primary), 0 0 20px var(--primary);
         }
 
@@ -22,161 +23,443 @@
             font-family: 'Prompt', sans-serif;
             background-color: var(--dark-bg);
             background-image: radial-gradient(circle at center, #3e0a0a 0%, #000 100%);
-            color: white; margin: 0; height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* HEADER */
-        .header { position: absolute; top: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 10; }
-        .logo-row { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; }
-        .logo-img { height: 60px; object-fit: contain; }
-        .logo-circle { height: 60px; border-radius: 50%; border: 2px solid var(--primary); }
-        .title { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px var(--secondary); margin: 0; }
-        .subtitle { font-size: 1.1rem; color: #ccc; margin-top: 5px; }
+        /* --- Header & Navbar --- */
+        .top-header { background: white; padding: 10px 0; border-bottom: 4px solid var(--accent); z-index: 10; }
+        .logo-img { height: 50px; width: auto; object-fit: contain; }
+        .header-title { color: var(--secondary); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1.2; font-size: 1.5rem; }
+        .header-subtitle { color: #008080; font-size: 0.8rem; margin-top: 5px; }
 
-        /* DISPLAY */
-        .display-container {
-            position: relative; width: 85%; max-width: 900px; height: 350px;
-            background: rgba(0, 0, 0, 0.6); border: 4px solid var(--primary); border-radius: 20px;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); display: flex; align-items: center; justify-content: center;
-            overflow: hidden; backdrop-filter: blur(10px); transition: 0.5s;
+        .main-navbar { background-color: var(--secondary); padding: 10px 0; white-space: nowrap; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 9; }
+        .nav-container { display: flex; justify-content: center; gap: 10px; min-width: max-content; padding: 0 15px; }
+        .nav-btn { background: rgba(255,255,255,0.15); color: white !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 8px 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .nav-btn:hover, .nav-btn.active { background: var(--accent); color: var(--secondary) !important; font-weight: bold; transform: translateY(-2px); }
+
+        /* --- SCANNER DISPLAY --- */
+        .game-container {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative;
         }
-        .display-text { font-size: 4.5rem; font-weight: bold; color: var(--primary); text-shadow: var(--neon-glow); text-align: center; padding: 20px; word-wrap: break-word; }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255, 82, 82, 0.5); opacity: 0.5; animation: scan 3s linear infinite; }
-        @keyframes scan { 0% {top: 0;} 100% {top: 100%;} }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
-        .shake-anim { animation: shake 0.5s; }
+
+        .scanner-box {
+            position: relative;
+            width: 100%; max-width: 600px; height: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 4px solid var(--primary);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 82, 82, 0.2), inset 0 0 50px rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+
+        .display-text {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: var(--neon-glow);
+            text-align: center;
+            padding: 20px;
+            word-wrap: break-word;
+            z-index: 2;
+            letter-spacing: 2px;
+            transition: color 0.3s; /* Smooth color transition */
+        }
+
+        /* Scan Line Animation */
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            opacity: 0;
+            z-index: 1;
+        }
+        .scanning .scan-line {
+            opacity: 0.8;
+            animation: scanAnim 1.5s linear infinite;
+        }
+        
+        @keyframes scanAnim {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
 
         /* BUTTON */
-        .control-btn {
-            margin-top: 40px; padding: 20px 60px; font-size: 2rem; font-family: 'Prompt', sans-serif; font-weight: bold;
-            color: #3e0a0a; background: var(--accent); border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 0 20px var(--accent); transition: 0.2s; text-transform: uppercase;
+        .spin-btn {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
+            border: none; color: var(--secondary); font-size: 2rem; font-weight: 900;
+            padding: 20px 80px; border-radius: 50px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), 0 10px 0 var(--secondary);
+            cursor: pointer; transition: all 0.1s; text-transform: uppercase;
+            position: relative; overflow: hidden;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px var(--accent); }
-        .control-btn:disabled { background: #555; box-shadow: none; color: #888; cursor: not-allowed; }
+        .spin-btn:active { transform: translateY(5px); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), 0 5px 0 var(--secondary); }
+        .spin-btn:disabled { filter: grayscale(100%); cursor: wait; transform: translateY(5px); box-shadow: none; }
 
-        .admin-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #555; font-size: 1.5rem; cursor: pointer; z-index: 20; }
-        .admin-btn:hover { color: white; transform: rotate(90deg); transition: 0.3s;}
+        /* Admin Button */
+        .admin-btn {
+            position: fixed; bottom: 20px; right: 20px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;
+            width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; cursor: pointer; transition: 0.3s; z-index: 90;
+        }
+        .admin-btn:hover { background: var(--primary); color: white; transform: rotate(90deg); }
 
-        /* MODAL */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 600px; color: #333; max-height: 90vh; overflow-y: auto; }
-        textarea { width: 100%; font-family: 'Prompt', sans-serif; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-save { background: var(--secondary); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-cancel { background: #ccc; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+        /* Modals */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            justify-content: center; align-items: center;
+        }
+        .modal-box {
+            background: #fff; color: #333; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 450px; text-align: left;
+            border: 4px solid var(--accent); animation: zoomIn 0.3s;
+        }
+        @keyframes zoomIn { from { transform: scale(0); } to { transform: scale(1); } }
+        
+        .status-text { color: rgba(255,255,255,0.6); margin-top: 15px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <button class="admin-btn" onclick="openSettings()"><i class="fa-solid fa-gear"></i></button>
-    <div class="header">
-        <div class="logo-row">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDH91BizHKqi00_QqEcCQ76jrBxJrRGTthfQ&s" class="logo-img" alt="R8">
-            <img src="https://skko.moph.go.th/dward/document_file/skko/common_form_upload_file/20160322201256_410195252.png" class="logo-img" alt="SKKO">
-            <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img" alt="SWD">
-            <img src="https://mohpromt.moph.go.th/mpc/wp-content/uploads/2021/10/New_logo-mohpormt-01.png" class="logo-img" alt="MorProm" style="height: 55px;">
+
+    <header class="top-header">
+        <div class="container text-center">
+            <div class="d-flex justify-content-center gap-2 mb-2">
+                <img src="https://img2.pic.in.th/pic/R8NEWLOGO.md.png" class="logo-img">
+                <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img">
+                <img src="https://mohpromt.moph.go.th/mpc/wp-content/uploads/2021/10/New_logo-mohpormt-01.png" class="logo-img">
+            </div>
+            <h2 class="header-title">Event Quick Big Win</h2>
+            <p class="header-subtitle mb-0">Digital Health Lucky Draw</p>
         </div>
-        <div class="title">Event Quick Big Win</div>
-        <div class="subtitle">ลุ้นรับของขวัญปีใหม่ Super App</div>
-    </div>
+    </header>
 
-    <div class="display-container" id="displayBox">
-        <div class="scan-line"></div><div class="display-text" id="displayText">PRESS START</div>
-    </div>
-    <button class="control-btn" id="spinBtn" onclick="startSpin()">เริ่มสุ่มรางวัล</button>
-
-    <div id="settingModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color:var(--secondary)">⚙️ ตั้งค่าสต็อกรางวัล</h3>
-            <label>🎁 รางวัล (Name : Qty)</label><textarea id="prizeInput" rows="8"></textarea>
-            <label>😢 ข้อความปลอบใจ</label><textarea id="consolationInput" rows="5"></textarea>
-            <div style="text-align: right; margin-top: 20px;"><button class="btn-cancel" onclick="closeSettings()">ยกเลิก</button><button class="btn-save" onclick="saveData()">บันทึก</button></div>
+    <div class="main-navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-btn"><i class="fa-solid fa-chart-line"></i> กลับหน้าหลัก</a>
+            <a href="lucky_game.html" class="nav-btn active"><i class="fa-solid fa-gift"></i> สแกนรางวัล</a>
         </div>
     </div>
+
+    <div class="game-container">
+        
+        <!-- Scanner Display -->
+        <div class="scanner-box" id="scannerBox">
+            <div class="scan-line"></div>
+            <div class="display-text" id="displayText">PRESS START</div>
+        </div>
+
+        <button id="spinBtn" class="spin-btn" onclick="startScan()">
+            <i class="fa-solid fa-fingerprint"></i> START SCAN
+        </button>
+        <p class="status-text" id="statusText">เชื่อมต่อระบบฐานข้อมูล...</p>
+    </div>
+
+    <!-- ปุ่มตั้งค่า Admin -->
+    <button class="admin-btn" onclick="openAdminModal()">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+
+    <!-- Modal เพิ่มของรางวัล (Admin) -->
+    <div id="adminModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="m-0 text-danger"><i class="fa-solid fa-database"></i> จัดการรางวัล (Admin)</h3>
+                <button type="button" class="btn-close" onclick="closeModal('adminModal')"></button>
+            </div>
+            
+            <form id="addRewardForm" onsubmit="submitReward(event)">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ชื่อของรางวัล</label>
+                    <input type="text" class="form-control" id="rewardName" required placeholder="เช่น ไม่ได้รับรางวัล, แก้วน้ำ">
+                    <div class="form-text text-danger">*หากเป็นรางวัลปลอบใจ ให้ตั้งชื่อว่า 'ไม่ได้รับรางวัล'</div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">จำนวน (Stock)</label>
+                        <input type="number" class="form-control" id="rewardStock" required value="9999" min="0">
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">โอกาส (Weight)</label>
+                        <input type="number" class="form-control" id="rewardWeight" required value="50" min="1" title="ยิ่งเยอะยิ่งออกง่าย">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">สีธีม</label>
+                    <input type="color" class="form-control form-control-color" id="rewardColor" value="#CCCCCC">
+                </div>
+
+                <button type="submit" id="saveBtn" class="btn btn-primary w-100 fw-bold">
+                    <i class="fa-solid fa-save"></i> เพิ่มรางวัลเข้าระบบ
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Audio -->
+    <audio id="scanSound" loop>
+        <source src="https://assets.mixkit.co/active_storage/sfx/2044/2044-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="winSound">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="failSound">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playTone(f,t,d){if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.type=t;o.frequency.setValueAtTime(f,audioCtx.currentTime);g.gain.setValueAtTime(0.1,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+d);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d);}
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyjbm3yoBaly8pVeXKz1QTpieUe_KjjNWpatAgq_mx3jtkX7zs6vFKm8DXzBCkxNrJm/exec';
+
+        // *** ข้อความปลอบใจ ***
+        const consolationMessages = [
+            "ขอบคุณที่ร่วมสนุก",
+            "อาจจะยังน๊าาา",
+            "วันนี้ดวงไม่ค่อยดี",
+            "พยายามใหม่อีกนิด",
+            "สู้ต่อไป ฮีโร่!",
+            "เสียใจด้วยนะ",
+            "เกือบได้แล้ว!"
+        ];
+
+        const displayText = document.getElementById('displayText');
+        const scannerBox = document.getElementById('scannerBox');
+        const spinBtn = document.getElementById('spinBtn');
+        const statusText = document.getElementById('statusText');
         
-        let prizeList = [], consolationMsgs = [], isSpinning = false;
-        window.onload = () => { loadData(); };
+        const scanSound = document.getElementById('scanSound');
+        const winSound = document.getElementById('winSound');
+        const failSound = document.getElementById('failSound');
 
-        function startSpin() {
-            if (isSpinning) return;
-            const availablePrizes = prizeList.filter(p => p.qty > 0);
-            let animationPool = [...availablePrizes.map(p => p.name), ...consolationMsgs];
-            if (animationPool.length === 0) { alert("ไม่มีข้อมูลรางวัล!"); return; }
-            
-            isSpinning = true;
-            document.getElementById('spinBtn').disabled = true;
-            document.getElementById('displayText').style.color = "#FF5252";
-            document.getElementById('displayBox').style.borderColor = "#FF5252";
-            document.getElementById('displayText').classList.remove('shake-anim');
+        let isScanning = false;
+        let availableRewards = ["LOADING..."]; // เก็บรายชื่อรางวัลทั้งหมดเพื่อทำ Animation
 
-            let speed = 50, counter = 0, maxLoops = 25 + Math.random() * 15;
-            function loop() {
-                document.getElementById('displayText').innerText = animationPool[Math.floor(Math.random() * animationPool.length)];
-                playTone(800, 'square', 0.05);
-                counter++;
-                if (counter < maxLoops) setTimeout(loop, speed);
-                else if (speed < 600) { speed += 50; setTimeout(loop, speed); }
-                else decideResult(availablePrizes);
+        // 1. Init: โหลดรายชื่อรางวัลมาเก็บไว้ก่อน
+        async function initGame() {
+            spinBtn.disabled = true;
+            try {
+                const res = await fetch(API_URL + "?action=getRewards");
+                const data = await res.json();
+                
+                if (data && data.length > 0) {
+                    // เก็บชื่อรางวัลทั้งหมดลงตัวแปร global
+                    availableRewards = data.map(r => r.name);
+                    
+                    spinBtn.disabled = false;
+                    statusText.innerText = "ระบบพร้อมใช้งาน (System Online)";
+                    statusText.style.color = "#4CAF50";
+                } else {
+                    statusText.innerText = "ไม่พบข้อมูลรางวัล";
+                }
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้";
+                statusText.style.color = "red";
             }
-            loop();
         }
 
-        function decideResult(availablePrizes) {
-            let finalPool = [];
-            availablePrizes.forEach(p => finalPool.push({type: 'prize', val: p.name}));
-            consolationMsgs.forEach(msg => finalPool.push({type: 'fail', val: msg}));
+        // 2. Start Scan: เริ่มวิ่ง Animation และยิง API
+        async function startScan() {
+            if (isScanning) return;
+            isScanning = true;
+            spinBtn.disabled = true;
             
-            if (finalPool.length === 0) { endGame("หมดแล้ว!", 'fail'); return; }
-            const result = finalPool[Math.floor(Math.random() * finalPool.length)];
-            if (result.type === 'prize') updateStock(result.val);
-            endGame(result.val, result.type);
+            scannerBox.classList.add('scanning'); 
+            playScanSound();
+            statusText.innerText = "กำลังสแกนหาผู้โชคดี...";
+
+            // เริ่ม Animation แบบวิ่งเร็วๆ (50ms)
+            startSlotAnimation();
+
+            try {
+                const formBody = new URLSearchParams();
+                formBody.append('action', 'spin');
+                
+                // ยิง API ไปตัดสต็อกจริงๆ
+                const res = await fetch(API_URL, { method: 'POST', body: formBody });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    // ได้ผลลัพธ์แล้ว -> สั่งให้ Animation ค่อยๆ ช้าลงและหยุดที่ผลลัพธ์
+                    slowDownAndStop(result);
+                } else {
+                    alert("Error: " + result.message);
+                    resetGame();
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+                resetGame();
+            }
         }
 
-        function updateStock(name) {
-            const idx = prizeList.findIndex(p => p.name === name);
-            if (idx !== -1 && prizeList[idx].qty > 0) { prizeList[idx].qty--; saveToLocalStorage(); }
+        // --- Animation Logic ---
+        let animTimeout;
+        let currentSpeed = 50; // ความเร็วเริ่มต้น (ยิ่งน้อยยิ่งเร็ว)
+        let targetRewardName = null;
+        let isSlowingDown = false;
+
+        function startSlotAnimation() {
+            currentSpeed = 50; 
+            isSlowingDown = false;
+            targetRewardName = null;
+            displayText.style.color = "#FF5252"; // สีแดงตอนสแกน
+            loopAnimation();
         }
 
-        function endGame(text, type) {
-            isSpinning = false;
-            const display = document.getElementById('displayText');
-            display.innerText = text;
-            document.getElementById('spinBtn').disabled = false;
+        function loopAnimation() {
+            // สุ่มแสดงชื่อรางวัลจากรายการที่มี
+            const randomName = availableRewards[Math.floor(Math.random() * availableRewards.length)];
+            displayText.innerText = randomName;
 
-            if (type === 'prize') {
-                playTone(523, 'triangle', 0.4); setTimeout(()=>playTone(784,'triangle',0.4),200);
-                display.style.color = "#FFD700"; document.getElementById('displayBox').style.borderColor = "#FFD700";
-                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#FFD700', '#D32F2F', '#ffffff'] });
+            if (isSlowingDown) {
+                // ถ้าอยู่ในโหมดช้าลง ให้เพิ่ม delay ขึ้นเรื่อยๆ
+                currentSpeed += 30; // ยิ่งบวกเยอะ ยิ่งช้าลงไว
+                
+                // ถ้าช้าถึงจุดที่กำหนด (เช่น 400ms) ให้หยุดที่รางวัลจริง
+                if (currentSpeed > 400) {
+                    finishGame(targetRewardName);
+                    return; // จบการทำงาน loop
+                }
+            }
+
+            // Loop ต่อไป
+            animTimeout = setTimeout(loopAnimation, currentSpeed);
+        }
+
+        function slowDownAndStop(result) {
+            // เก็บผลลัพธ์ไว้
+            targetRewardName = result; 
+            // เริ่มโหมดช้าลง (Animation Loop จะตรวจสอบ flag นี้)
+            isSlowingDown = true; 
+        }
+
+        function finishGame(resultData) {
+            scannerBox.classList.remove('scanning'); 
+            stopScanSound();
+
+            const rewardName = resultData.rewardName;
+            
+            // เช็คว่าเป็นรางวัลปลอบใจหรือไม่
+            const isFail = rewardName.includes("ไม่ได้รับ") || rewardName.includes("เสียใจ") || rewardName.includes("ไม่มีรางวัล");
+
+            if (isFail) {
+                // --- กรณีไม่ได้รางวัล ---
+                const randomMsg = consolationMessages[Math.floor(Math.random() * consolationMessages.length)];
+                displayText.innerText = randomMsg;
+                displayText.style.color = "#CCCCCC";
+                scannerBox.style.borderColor = "#666666";
+                scannerBox.style.boxShadow = "none";
+                
+                failSound.currentTime = 0;
+                failSound.play();
+                statusText.innerText = "บันทึกข้อมูลเรียบร้อย (ไม่ได้รางวัล)";
             } else {
-                playTone(300, 'sawtooth', 0.5);
-                display.style.color = "#bdc3c7"; document.getElementById('displayBox').style.borderColor = "#7f8c8d";
-                display.classList.add('shake-anim');
+                // --- กรณีได้รางวัล ---
+                displayText.innerText = rewardName;
+                displayText.style.color = "#FFD700";
+                scannerBox.style.borderColor = "#FFD700";
+                scannerBox.style.boxShadow = "0 0 50px rgba(255, 215, 0, 0.5)";
+
+                winSound.currentTime = 0;
+                winSound.play();
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#FFD700', '#FF5252'] });
+                statusText.innerText = "ยินดีด้วย! บันทึกข้อมูลเรียบร้อย";
+            }
+
+            // ปุ่มรีเซ็ต
+            spinBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> สแกนอีกครั้ง';
+            spinBtn.disabled = false;
+            isScanning = false;
+        }
+
+        function resetGame() {
+            clearTimeout(animTimeout);
+            scannerBox.classList.remove('scanning');
+            stopScanSound();
+            displayText.innerText = "PRESS START";
+            displayText.style.color = "var(--primary)";
+            scannerBox.style.borderColor = "var(--primary)";
+            scannerBox.style.boxShadow = "0 0 30px rgba(255, 82, 82, 0.2)";
+            spinBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> START SCAN';
+            spinBtn.disabled = false;
+            isScanning = false;
+        }
+
+        // --- Audio Helpers ---
+        function playScanSound() {
+            scanSound.currentTime = 0;
+            scanSound.volume = 0.5;
+            scanSound.play().catch(e => console.log("Audio permission needed"));
+        }
+        function stopScanSound() {
+            scanSound.pause();
+        }
+
+        // --- Admin ---
+        function openAdminModal() {
+            let pass = prompt("รหัสผ่านแอดมิน (PIN):");
+            if (pass === "1234") { 
+                document.getElementById('adminModal').style.display = 'flex';
+            } else if (pass !== null) {
+                alert("รหัสผ่านไม่ถูกต้อง");
             }
         }
 
-        function saveData() {
-            const pInput = document.getElementById('prizeInput').value.split("\n");
-            prizeList = [];
-            pInput.forEach(line => { if(line.trim()){ let parts=line.split(":"); prizeList.push({name:parts[0].trim(), qty: parseInt(parts[1]||1)}); }});
-            consolationMsgs = document.getElementById('consolationInput').value.split("\n").filter(s=>s.trim());
-            saveToLocalStorage(); closeSettings();
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
         }
-        function saveToLocalStorage() { localStorage.setItem('digitalExpoData_v3', JSON.stringify({prizes: prizeList, consolations: consolationMsgs})); }
-        function loadData() {
-            const data = JSON.parse(localStorage.getItem('digitalExpoData_v3') || '{"prizes":[], "consolations":[]}');
-            prizeList = data.prizes.length ? data.prizes : [{name:"Smartwatch",qty:2}];
-            consolationMsgs = data.consolations.length ? data.consolations : ["ขอบคุณที่ร่วมสนุก"];
+
+        async function submitReward(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'กำลังบันทึก...';
+            btn.disabled = true;
+
+            const formBody = new URLSearchParams();
+            formBody.append('action', 'addReward');
+            formBody.append('name', document.getElementById('rewardName').value);
+            formBody.append('stock', document.getElementById('rewardStock').value);
+            formBody.append('weight', document.getElementById('rewardWeight').value);
+            formBody.append('color', document.getElementById('rewardColor').value);
+
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: formBody });
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    alert("เพิ่มรางวัลสำเร็จ!");
+                    document.getElementById('addRewardForm').reset();
+                    closeModal('adminModal');
+                    initGame(); // โหลดรายชื่อใหม่
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (err) {
+                alert("บันทึกไม่สำเร็จ");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
-        function openSettings() { 
-            document.getElementById('prizeInput').value = prizeList.map(p=>`${p.name}:${p.qty}`).join("\n");
-            document.getElementById('consolationInput').value = consolationMsgs.join("\n");
-            document.getElementById('settingModal').style.display = 'flex'; 
-        }
-        function closeSettings() { document.getElementById('settingModal').style.display = 'none'; }
+
+        window.onload = initGame;
     </script>
 </body>
 </html>
