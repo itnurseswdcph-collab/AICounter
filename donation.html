@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
         body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; }
@@ -37,8 +38,8 @@
         .step-container.active { display: block; animation: fadeIn 0.3s; }
         
         /* Inputs */
-        .form-control-lg { border-radius: 15px; background: #f8f9fa; border: 2px solid #eee; }
-        .form-control-lg:focus { border-color: #b00d23; box-shadow: none; background: #fff; }
+        .form-control-lg, .form-select-lg { border-radius: 15px; background: #f8f9fa; border: 2px solid #eee; }
+        .form-control-lg:focus, .form-select-lg:focus { border-color: #b00d23; box-shadow: none; background: #fff; }
 
         /* Type Selection */
         .type-btn {
@@ -123,25 +124,27 @@
                     <div id="step1" class="step-container active">
                         <h5 class="mb-4 text-secondary text-start border-bottom pb-2">1. กรอกข้อมูลผู้บริจาค</h5>
                         
-                        <div class="mb-3 text-start">
-                            <label class="form-label text-muted">ชื่อจริง</label>
-                            <input type="text" id="firstName" class="form-control form-control-lg" placeholder="สมชาย">
-                        </div>
-                        <div class="mb-3 text-start">
-                            <label class="form-label text-muted">นามสกุล</label>
-                            <input type="text" id="lastName" class="form-control form-control-lg" placeholder="ใจดี">
-                        </div>
-                        <div class="mb-3 text-start">
-                             <label class="form-label text-muted">ข้อความ Banner (เลือกได้)</label>
-                             <select id="message" class="form-select form-select-lg">
-                                 <option value="HERO FOUND">HERO FOUND</option>
-                                 <option value="ขอขอบคุณ">ขอขอบคุณ</option>
-                                 <option value="ผู้เสียสละที่ยิ่งใหญ่">ผู้เสียสละที่ยิ่งใหญ่</option>
-                             </select>
+                        <div class="p-3">
+                            <div class="mb-3 text-start">
+                                <label class="form-label text-muted">ชื่อจริง</label>
+                                <input type="text" id="firstName" class="form-control form-control-lg" placeholder="เช่น สมชาย">
+                            </div>
+                            <div class="mb-3 text-start">
+                                <label class="form-label text-muted">นามสกุล</label>
+                                <input type="text" id="lastName" class="form-control form-control-lg" placeholder="เช่น ใจดี">
+                            </div>
+                            <div class="mb-3 text-start">
+                                 <label class="form-label text-muted">ข้อความ Banner (เลือกได้)</label>
+                                 <select id="message" class="form-select form-select-lg">
+                                     <option value="HERO FOUND!">HERO FOUND!</option>
+                                     <option value="ขอขอบคุณ">ขอขอบคุณ</option>
+                                     <option value="ผู้เสียสละที่ยิ่งใหญ่">ผู้เสียสละที่ยิ่งใหญ่</option>
+                                 </select>
+                            </div>
                         </div>
 
-                        <div class="mt-4 pt-2">
-                            <button class="btn btn-dark w-100 rounded-pill py-2 fs-5" onclick="toStep2()">
+                        <div class="p-3 pt-0">
+                            <button class="btn btn-dark w-100 rounded-pill py-3 fs-5 fw-bold shadow-sm" onclick="toStep2()">
                                 ถัดไป <i class="fa-solid fa-arrow-right"></i>
                             </button>
                         </div>
@@ -194,10 +197,10 @@
                             <i class="fa-solid fa-save"></i> บันทึกข้อมูล
                         </button>
                         <div class="row mt-2">
-                             <div class="col-4">
+                             <div class="col-6 text-start">
                                 <button class="btn btn-link text-muted text-decoration-none" onclick="switchStep('step2')">ย้อนกลับ</button>
                              </div>
-                             <div class="col-8 text-end">
+                             <div class="col-6 text-end">
                                 <button class="btn btn-link text-muted text-decoration-none" onclick="skipPhoto()">
                                     ข้าม (ไม่ถ่ายรูป)
                                 </button>
@@ -240,7 +243,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // *** URL API ของคุณ (อย่าลืมเปลี่ยนเป็น URL ที่ Deploy ล่าสุด) ***
+        // *** สำคัญ: ตรวจสอบ URL นี้ให้ตรงกับที่ Deploy ใน Google Apps Script ***
         const API_URL = 'https://script.google.com/macros/s/AKfycbyjbm3yoBaly8pVeXKz1QTpieUe_KjjNWpatAgq_mx3jtkX7zs6vFKm8DXzBCkxNrJm/exec';
 
         let selectedTypes = { organ: false, eye: false };
@@ -257,11 +260,14 @@
             }).catch(e => console.log("Load stats error"));
 
         function openRegisterModal() {
+            // Reset Data
             selectedTypes = { organ: false, eye: false };
             photoData = null;
             document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('firstName').value = '';
             document.getElementById('lastName').value = '';
+            
+            // Reset UI
             document.getElementById('captured-image').style.display = 'none';
             document.getElementById('btn-camera').style.display = 'block';
             document.getElementById('btn-retake').style.display = 'none';
@@ -307,7 +313,8 @@
         function takePhoto() {
             const video = document.getElementById('camera-preview');
             const canvas = document.getElementById('canvas');
-            const width = 480; 
+            // ลดขนาดรูปเพื่อให้ส่งเร็ว
+            const width = 640; 
             const height = video.videoHeight / (video.videoWidth/width);
             canvas.width = width; canvas.height = height;
             
@@ -342,6 +349,7 @@
 
             let promiseChain = Promise.resolve();
 
+            // ส่งข้อมูลแยกทีละรายการ (เพื่อความชัวร์ในการนับแยกประเภท)
             tasks.forEach((type, index) => {
                 promiseChain = promiseChain.then(() => {
                     let payload = { 
@@ -352,6 +360,7 @@
                         message: document.getElementById('message').value
                     };
                     
+                    // ส่งรูปภาพไปกับ Request แรกเท่านั้น (จะได้ไม่ซ้ำและไม่โหลดหนักเกินไป)
                     if(index === 0 && photoData) {
                         payload.image = photoData.split(',')[1]; 
                     }
@@ -368,6 +377,16 @@
             promiseChain.then(() => {
                 document.getElementById('loading-spin').style.display = 'none';
                 document.getElementById('success-msg').style.display = 'block';
+                
+                // อัปเดตตัวเลขหน้าเว็บทันที (Feedback)
+                if(selectedTypes.organ) {
+                    let el = document.getElementById('stat-organ');
+                    el.innerText = parseInt(el.innerText || 0) + 1;
+                }
+                if(selectedTypes.eye) {
+                    let el = document.getElementById('stat-eye');
+                    el.innerText = parseInt(el.innerText || 0) + 1;
+                }
             }).catch(e => {
                 alert("เกิดข้อผิดพลาด: " + e);
                 location.reload();
