@@ -105,7 +105,7 @@
         .spin-btn:active { transform: translateY(5px); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), 0 5px 0 var(--secondary); }
         .spin-btn:disabled { filter: grayscale(100%); cursor: wait; transform: translateY(5px); box-shadow: none; }
 
-        /* Admin Button */
+        /* Admin Button & Modal */
         .admin-btn {
             position: fixed; bottom: 20px; right: 20px;
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;
@@ -115,20 +115,32 @@
         }
         .admin-btn:hover { background: var(--primary); color: white; transform: rotate(90deg); }
 
-        /* Modals */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 100;
             justify-content: center; align-items: center;
         }
         .modal-box {
-            background: #fff; color: #333; padding: 30px; border-radius: 20px;
-            width: 90%; max-width: 450px; text-align: left;
+            background: #fff; color: #333; padding: 25px; border-radius: 15px;
+            width: 95%; max-width: 800px; text-align: left;
             border: 4px solid var(--accent); animation: zoomIn 0.3s;
+            max-height: 90vh; overflow-y: auto;
         }
         @keyframes zoomIn { from { transform: scale(0); } to { transform: scale(1); } }
         
         .status-text { color: rgba(255,255,255,0.6); margin-top: 15px; font-size: 0.9rem; }
+
+        /* Table Styles for Admin */
+        .reward-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        .reward-table th { background: #f8f9fa; padding: 8px; text-align: left; border-bottom: 2px solid #ddd; font-weight: bold; color: #555; }
+        .reward-table td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        .reward-table tr:hover { background: #f0f7ff; }
+        
+        .action-btn { font-size: 0.8rem; padding: 4px 10px; border-radius: 5px; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-edit { background: #ffc107; color: #333; }
+        .btn-edit:hover { background: #e0a800; }
+        
+        .color-dot { width: 15px; height: 15px; border-radius: 50%; display: inline-block; border: 1px solid #ccc; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -136,7 +148,7 @@
     <header class="top-header">
         <div class="container text-center">
             <div class="d-flex justify-content-center gap-2 mb-2">
-                <img src="https://img2.pic.in.th/pic/R8NEWLOGO.md.png" class="logo-img">
+                <img src="https://r8way.moph.go.th/r8way/img/R8NEWLOGO.png" class="logo-img">
                 <img src="https://swdcph.moph.go.th/intranet/login/images/logo_swd.png" class="logo-img">
                 <img src="https://mohpromt.moph.go.th/mpc/wp-content/uploads/2021/10/New_logo-mohpormt-01.png" class="logo-img">
             </div>
@@ -153,7 +165,6 @@
     </div>
 
     <div class="game-container">
-        
         <!-- Scanner Display -->
         <div class="scanner-box" id="scannerBox">
             <div class="scan-line"></div>
@@ -171,45 +182,72 @@
         <i class="fa-solid fa-gear"></i>
     </button>
 
-    <!-- Modal เพิ่มของรางวัล (Admin) -->
+    <!-- Modal เพิ่ม/แก้ไขของรางวัล (Admin) -->
     <div id="adminModal" class="modal-overlay">
         <div class="modal-box">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="m-0 text-danger"><i class="fa-solid fa-database"></i> จัดการรางวัล (Admin)</h3>
+                <h4 class="m-0 text-danger"><i class="fa-solid fa-database"></i> จัดการรางวัล (Admin)</h4>
                 <button type="button" class="btn-close" onclick="closeModal('adminModal')"></button>
             </div>
             
-            <form id="addRewardForm" onsubmit="submitReward(event)">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">ชื่อของรางวัล</label>
-                    <input type="text" class="form-control" id="rewardName" required placeholder="เช่น ไม่ได้รับรางวัล, แก้วน้ำ">
-                    <div class="form-text text-danger">*หากเป็นรางวัลปลอบใจ ให้ตั้งชื่อว่า 'ไม่ได้รับรางวัล'</div>
-                </div>
+            <!-- Form สำหรับเพิ่ม/แก้ไข -->
+            <form id="addRewardForm" onsubmit="submitReward(event)" class="p-3 border rounded bg-light mb-4 shadow-sm">
+                <input type="hidden" id="editId"> <!-- ซ่อน ID ไว้สำหรับตอนแก้ไข -->
                 
-                <div class="row">
-                    <div class="col-6 mb-3">
-                        <label class="form-label fw-bold">จำนวน (Stock)</label>
-                        <input type="number" class="form-control" id="rewardStock" required value="9999" min="0">
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold small mb-1">ชื่อรางวัล</label>
+                        <input type="text" class="form-control form-control-sm" id="rewardName" required placeholder="เช่น Smart Watch">
                     </div>
-                    <div class="col-6 mb-3">
-                        <label class="form-label fw-bold">โอกาส (Weight)</label>
-                        <input type="number" class="form-control" id="rewardWeight" required value="50" min="1" title="ยิ่งเยอะยิ่งออกง่าย">
+                    <div class="col-md-2 col-4">
+                        <label class="form-label fw-bold small mb-1">จำนวน</label>
+                        <input type="number" class="form-control form-control-sm" id="rewardStock" required min="0" value="1">
+                    </div>
+                    <div class="col-md-2 col-4">
+                        <label class="form-label fw-bold small mb-1" title="ยิ่งเยอะยิ่งออกง่าย">โอกาส</label>
+                        <input type="number" class="form-control form-control-sm" id="rewardWeight" required min="1" value="10">
+                    </div>
+                    <div class="col-md-1 col-4">
+                        <label class="form-label fw-bold small mb-1">สี</label>
+                        <input type="color" class="form-control form-control-color w-100 form-control-sm" id="rewardColor" value="#FFD700">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-1">
+                        <button type="submit" id="saveBtn" class="btn btn-primary btn-sm w-100 fw-bold">
+                            <i class="fa-solid fa-plus"></i> บันทึก
+                        </button>
+                        <button type="button" id="cancelEditBtn" onclick="resetForm()" class="btn btn-secondary btn-sm" style="display:none;" title="ยกเลิกการแก้ไข">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">สีธีม</label>
-                    <input type="color" class="form-control form-control-color" id="rewardColor" value="#CCCCCC">
+                <div class="form-text text-danger mt-1" style="font-size: 0.75rem;">
+                    *หากเป็นรางวัลปลอบใจ ให้ตั้งชื่อว่า <b>'ไม่ได้รับรางวัล'</b> (และตั้งโอกาสให้สูงกว่ารางวัลอื่น)
                 </div>
-
-                <button type="submit" id="saveBtn" class="btn btn-primary w-100 fw-bold">
-                    <i class="fa-solid fa-save"></i> เพิ่มรางวัลเข้าระบบ
-                </button>
             </form>
+
+            <!-- ตารางแสดงรายการ -->
+            <h6 class="fw-bold text-secondary border-bottom pb-2"><i class="fa-solid fa-list-check"></i> รายการรางวัลทั้งหมด</h6>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <table class="reward-table">
+                    <thead>
+                        <tr>
+                            <th>ชื่อรางวัล</th>
+                            <th width="60" class="text-center">คงเหลือ</th>
+                            <th width="60" class="text-center">โอกาส</th>
+                            <th width="40" class="text-center">สี</th>
+                            <th width="60" class="text-center">แก้ไข</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rewardTableBody">
+                        <!-- รายการจะถูกใส่ที่นี่ด้วย JS -->
+                        <tr><td colspan="5" class="text-center py-3 text-muted">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- Audio -->
+    <!-- Audio Files -->
     <audio id="scanSound" loop>
         <source src="https://assets.mixkit.co/active_storage/sfx/2044/2044-preview.mp3" type="audio/mpeg">
     </audio>
@@ -223,9 +261,10 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
+        // *** ใส่ URL ของคุณที่นี่ (ต้องเป็นเวอร์ชันล่าสุดที่มี action=editReward) ***
         const API_URL = 'https://script.google.com/macros/s/AKfycbyjbm3yoBaly8pVeXKz1QTpieUe_KjjNWpatAgq_mx3jtkX7zs6vFKm8DXzBCkxNrJm/exec';
 
-        // *** ข้อความปลอบใจ ***
+        // ข้อความปลอบใจ (สุ่มแสดงเมื่อไม่ได้รางวัล)
         const consolationMessages = [
             "ขอบคุณที่ร่วมสนุก",
             "อาจจะยังน๊าาา",
@@ -236,204 +275,117 @@
             "เกือบได้แล้ว!"
         ];
 
-        const displayText = document.getElementById('displayText');
-        const scannerBox = document.getElementById('scannerBox');
-        const spinBtn = document.getElementById('spinBtn');
-        const statusText = document.getElementById('statusText');
-        
-        const scanSound = document.getElementById('scanSound');
-        const winSound = document.getElementById('winSound');
-        const failSound = document.getElementById('failSound');
-
+        // ตัวแปร Global
+        let availableRewards = ["LOADING..."]; 
+        let fullRewardList = []; // เก็บข้อมูลเต็มเพื่อแสดงในตาราง
         let isScanning = false;
-        let availableRewards = ["LOADING..."]; // เก็บรายชื่อรางวัลทั้งหมดเพื่อทำ Animation
-
-        // 1. Init: โหลดรายชื่อรางวัลมาเก็บไว้ก่อน
+        
+        // --- 1. Init Game ---
         async function initGame() {
-            spinBtn.disabled = true;
+            document.getElementById('spinBtn').disabled = true;
             try {
                 const res = await fetch(API_URL + "?action=getRewards");
                 const data = await res.json();
                 
                 if (data && data.length > 0) {
-                    // เก็บชื่อรางวัลทั้งหมดลงตัวแปร global
+                    fullRewardList = data; // เก็บข้อมูลดิบ
                     availableRewards = data.map(r => r.name);
                     
-                    spinBtn.disabled = false;
-                    statusText.innerText = "ระบบพร้อมใช้งาน (System Online)";
-                    statusText.style.color = "#4CAF50";
+                    renderRewardTable(); // สร้างตาราง Admin
+                    
+                    document.getElementById('spinBtn').disabled = false;
+                    document.getElementById('statusText').innerText = "ระบบพร้อมใช้งาน (System Online)";
+                    document.getElementById('statusText').style.color = "#4CAF50";
                 } else {
-                    statusText.innerText = "ไม่พบข้อมูลรางวัล";
+                    document.getElementById('statusText').innerText = "ไม่พบข้อมูลรางวัล";
                 }
             } catch (err) {
                 console.error(err);
-                statusText.innerText = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้";
-                statusText.style.color = "red";
+                document.getElementById('statusText').innerText = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้";
+                document.getElementById('statusText').style.color = "red";
             }
         }
 
-        // 2. Start Scan: เริ่มวิ่ง Animation และยิง API
-        async function startScan() {
-            if (isScanning) return;
-            isScanning = true;
-            spinBtn.disabled = true;
+        // --- 2. Render Table (Admin) ---
+        function renderRewardTable() {
+            const tbody = document.getElementById('rewardTableBody');
+            tbody.innerHTML = '';
             
-            scannerBox.classList.add('scanning'); 
-            playScanSound();
-            statusText.innerText = "กำลังสแกนหาผู้โชคดี...";
-
-            // เริ่ม Animation แบบวิ่งเร็วๆ (50ms)
-            startSlotAnimation();
-
-            try {
-                const formBody = new URLSearchParams();
-                formBody.append('action', 'spin');
-                
-                // ยิง API ไปตัดสต็อกจริงๆ
-                const res = await fetch(API_URL, { method: 'POST', body: formBody });
-                const result = await res.json();
-
-                if (result.status === 'success') {
-                    // ได้ผลลัพธ์แล้ว -> สั่งให้ Animation ค่อยๆ ช้าลงและหยุดที่ผลลัพธ์
-                    slowDownAndStop(result);
-                } else {
-                    alert("Error: " + result.message);
-                    resetGame();
-                }
-
-            } catch (error) {
-                console.error(error);
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-                resetGame();
-            }
-        }
-
-        // --- Animation Logic ---
-        let animTimeout;
-        let currentSpeed = 50; // ความเร็วเริ่มต้น (ยิ่งน้อยยิ่งเร็ว)
-        let targetRewardName = null;
-        let isSlowingDown = false;
-
-        function startSlotAnimation() {
-            currentSpeed = 50; 
-            isSlowingDown = false;
-            targetRewardName = null;
-            displayText.style.color = "#FF5252"; // สีแดงตอนสแกน
-            loopAnimation();
-        }
-
-        function loopAnimation() {
-            // สุ่มแสดงชื่อรางวัลจากรายการที่มี
-            const randomName = availableRewards[Math.floor(Math.random() * availableRewards.length)];
-            displayText.innerText = randomName;
-
-            if (isSlowingDown) {
-                // ถ้าอยู่ในโหมดช้าลง ให้เพิ่ม delay ขึ้นเรื่อยๆ
-                currentSpeed += 30; // ยิ่งบวกเยอะ ยิ่งช้าลงไว
-                
-                // ถ้าช้าถึงจุดที่กำหนด (เช่น 400ms) ให้หยุดที่รางวัลจริง
-                if (currentSpeed > 400) {
-                    finishGame(targetRewardName);
-                    return; // จบการทำงาน loop
-                }
+            if (fullRewardList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3">ยังไม่มีข้อมูลรางวัล</td></tr>';
+                return;
             }
 
-            // Loop ต่อไป
-            animTimeout = setTimeout(loopAnimation, currentSpeed);
+            fullRewardList.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td class="text-center">${item.stock}</td>
+                    <td class="text-center">${item.weight}</td>
+                    <td class="text-center"><span class="color-dot" style="background-color:${item.color}"></span></td>
+                    <td class="text-center">
+                        <button class="action-btn btn-edit" onclick="prepareEdit(${item.id})" title="แก้ไข">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        function slowDownAndStop(result) {
-            // เก็บผลลัพธ์ไว้
-            targetRewardName = result; 
-            // เริ่มโหมดช้าลง (Animation Loop จะตรวจสอบ flag นี้)
-            isSlowingDown = true; 
-        }
+        // --- 3. Edit Logic ---
+        function prepareEdit(id) {
+            // ค้นหาข้อมูลจาก ID
+            const item = fullRewardList.find(r => r.id == id);
+            if (!item) return;
 
-        function finishGame(resultData) {
-            scannerBox.classList.remove('scanning'); 
-            stopScanSound();
+            // นำข้อมูลใส่ฟอร์ม
+            document.getElementById('editId').value = item.id;
+            document.getElementById('rewardName').value = item.name;
+            document.getElementById('rewardStock').value = item.stock;
+            document.getElementById('rewardWeight').value = item.weight;
+            document.getElementById('rewardColor').value = item.color;
 
-            const rewardName = resultData.rewardName;
+            // เปลี่ยนปุ่มเป็น Update
+            const btn = document.getElementById('saveBtn');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> อัปเดต';
+            btn.classList.replace('btn-primary', 'btn-warning');
             
-            // เช็คว่าเป็นรางวัลปลอบใจหรือไม่
-            const isFail = rewardName.includes("ไม่ได้รับ") || rewardName.includes("เสียใจ") || rewardName.includes("ไม่มีรางวัล");
-
-            if (isFail) {
-                // --- กรณีไม่ได้รางวัล ---
-                const randomMsg = consolationMessages[Math.floor(Math.random() * consolationMessages.length)];
-                displayText.innerText = randomMsg;
-                displayText.style.color = "#CCCCCC";
-                scannerBox.style.borderColor = "#666666";
-                scannerBox.style.boxShadow = "none";
-                
-                failSound.currentTime = 0;
-                failSound.play();
-                statusText.innerText = "บันทึกข้อมูลเรียบร้อย (ไม่ได้รางวัล)";
-            } else {
-                // --- กรณีได้รางวัล ---
-                displayText.innerText = rewardName;
-                displayText.style.color = "#FFD700";
-                scannerBox.style.borderColor = "#FFD700";
-                scannerBox.style.boxShadow = "0 0 50px rgba(255, 215, 0, 0.5)";
-
-                winSound.currentTime = 0;
-                winSound.play();
-                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#FFD700', '#FF5252'] });
-                statusText.innerText = "ยินดีด้วย! บันทึกข้อมูลเรียบร้อย";
-            }
-
-            // ปุ่มรีเซ็ต
-            spinBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> สแกนอีกครั้ง';
-            spinBtn.disabled = false;
-            isScanning = false;
+            // แสดงปุ่มยกเลิก
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+            
+            // เลื่อน Scroll ไปที่ฟอร์มด้านบน
+            document.querySelector('.modal-box').scrollTop = 0;
         }
 
-        function resetGame() {
-            clearTimeout(animTimeout);
-            scannerBox.classList.remove('scanning');
-            stopScanSound();
-            displayText.innerText = "PRESS START";
-            displayText.style.color = "var(--primary)";
-            scannerBox.style.borderColor = "var(--primary)";
-            scannerBox.style.boxShadow = "0 0 30px rgba(255, 82, 82, 0.2)";
-            spinBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> START SCAN';
-            spinBtn.disabled = false;
-            isScanning = false;
+        function resetForm() {
+            document.getElementById('addRewardForm').reset();
+            document.getElementById('editId').value = '';
+            
+            const btn = document.getElementById('saveBtn');
+            btn.innerHTML = '<i class="fa-solid fa-plus"></i> บันทึก';
+            btn.classList.remove('btn-warning');
+            btn.classList.add('btn-primary');
+            
+            document.getElementById('cancelEditBtn').style.display = 'none';
         }
 
-        // --- Audio Helpers ---
-        function playScanSound() {
-            scanSound.currentTime = 0;
-            scanSound.volume = 0.5;
-            scanSound.play().catch(e => console.log("Audio permission needed"));
-        }
-        function stopScanSound() {
-            scanSound.pause();
-        }
-
-        // --- Admin ---
-        function openAdminModal() {
-            let pass = prompt("รหัสผ่านแอดมิน (PIN):");
-            if (pass === "1234") { 
-                document.getElementById('adminModal').style.display = 'flex';
-            } else if (pass !== null) {
-                alert("รหัสผ่านไม่ถูกต้อง");
-            }
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
+        // --- 4. Submit Logic (Add/Edit) ---
         async function submitReward(e) {
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'กำลังบันทึก...';
+            btn.innerHTML = '...';
             btn.disabled = true;
 
+            const editId = document.getElementById('editId').value;
+            // ถ้ามี ID = แก้ไข, ถ้าไม่มี = เพิ่มใหม่
+            const action = editId ? 'editReward' : 'addReward';
+
             const formBody = new URLSearchParams();
-            formBody.append('action', 'addReward');
+            formBody.append('action', action);
+            if(editId) formBody.append('id', editId);
+            
             formBody.append('name', document.getElementById('rewardName').value);
             formBody.append('stock', document.getElementById('rewardStock').value);
             formBody.append('weight', document.getElementById('rewardWeight').value);
@@ -444,14 +396,14 @@
                 const result = await res.json();
                 
                 if (result.status === 'success') {
-                    alert("เพิ่มรางวัลสำเร็จ!");
-                    document.getElementById('addRewardForm').reset();
-                    // closeModal('adminModal'); // ไม่ปิดอัตโนมัติแล้ว ตามคำขอ
-                    initGame(); // โหลดรายชื่อใหม่ในเบื้องหลัง
+                    alert(result.message || "บันทึกสำเร็จ!");
+                    resetForm();
+                    initGame(); // โหลดข้อมูลใหม่เพื่ออัปเดตตาราง
                 } else {
                     alert("Error: " + result.message);
                 }
             } catch (err) {
+                console.error(err);
                 alert("บันทึกไม่สำเร็จ");
             } finally {
                 btn.innerHTML = originalText;
@@ -459,6 +411,128 @@
             }
         }
 
+        // --- 5. Game Logic (Scanner) ---
+        async function startScan() {
+            if (isScanning) return;
+            isScanning = true;
+
+            const spinBtn = document.getElementById('spinBtn');
+            const scannerBox = document.getElementById('scannerBox');
+            const displayText = document.getElementById('displayText');
+            const statusText = document.getElementById('statusText');
+            
+            spinBtn.disabled = true;
+            scannerBox.classList.add('scanning');
+            playScanSound();
+            statusText.innerText = "กำลังสแกนหาผู้โชคดี...";
+
+            // Animation Loop
+            let speed = 50;
+            let slowDown = false;
+            let targetResult = null;
+            let animTimeout;
+            
+            function loop() {
+                // สุ่มแสดงชื่อ
+                const randomName = availableRewards[Math.floor(Math.random() * availableRewards.length)];
+                displayText.innerText = randomName;
+                displayText.style.color = "#FF5252";
+
+                if (slowDown) {
+                    speed += 30; // ยิ่งบวกเยอะ ยิ่งช้าไว
+                    if (speed > 400) { 
+                        finish(targetResult); 
+                        return; 
+                    }
+                }
+                animTimeout = setTimeout(loop, speed);
+            }
+            loop();
+
+            // Fetch Result from API
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: new URLSearchParams({action: 'spin'}) });
+                const result = await res.json();
+                
+                if(result.status === 'success') {
+                    targetResult = result;
+                    slowDown = true; // เริ่มช้าลงเมื่อได้ผลลัพธ์
+                } else {
+                    clearTimeout(animTimeout);
+                    alert("Error: " + result.message);
+                    location.reload();
+                }
+            } catch(e) {
+                clearTimeout(animTimeout);
+                alert("Connection Error");
+                location.reload();
+            }
+        }
+
+        function finish(result) {
+            const scannerBox = document.getElementById('scannerBox');
+            const displayText = document.getElementById('displayText');
+            
+            scannerBox.classList.remove('scanning');
+            stopScanSound();
+            
+            const name = result.rewardName;
+            // เช็คคำว่าเป็นรางวัลปลอบใจหรือไม่
+            const isFail = name.includes("ไม่ได้รับ") || name.includes("เสียใจ") || name.includes("ไม่มีรางวัล");
+
+            if (isFail) {
+                // --- Fail Case ---
+                displayText.innerText = consolationMessages[Math.floor(Math.random() * consolationMessages.length)];
+                displayText.style.color = "#ccc";
+                scannerBox.style.borderColor = "#666";
+                scannerBox.style.boxShadow = "none";
+                
+                const failAudio = document.getElementById('failSound');
+                failAudio.currentTime = 0;
+                failAudio.play();
+                
+                document.getElementById('statusText').innerText = "บันทึกข้อมูลเรียบร้อย (ไม่ได้รางวัล)";
+            } else {
+                // --- Win Case ---
+                displayText.innerText = name;
+                displayText.style.color = "#FFD700";
+                scannerBox.style.borderColor = "#FFD700";
+                scannerBox.style.boxShadow = "0 0 50px rgba(255, 215, 0, 0.5)";
+                
+                const winAudio = document.getElementById('winSound');
+                winAudio.currentTime = 0;
+                winAudio.play();
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FF5252'] });
+                
+                document.getElementById('statusText').innerText = "ยินดีด้วย! บันทึกข้อมูลเรียบร้อย";
+            }
+            
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> สแกนอีกครั้ง';
+            spinBtn.disabled = false;
+            isScanning = false;
+        }
+
+        // --- Audio Helpers ---
+        const scanAudio = document.getElementById('scanSound');
+        function playScanSound() {
+            scanAudio.currentTime = 0;
+            scanAudio.volume = 0.5;
+            scanAudio.play().catch(e=>{});
+        }
+        function stopScanSound() {
+            scanAudio.pause();
+        }
+
+        // --- Admin Open/Close ---
+        function openAdminModal() {
+            if (prompt("รหัสผ่านแอดมิน (PIN):") === "1234") {
+                document.getElementById('adminModal').style.display = 'flex';
+            } else { alert("รหัสผ่านไม่ถูกต้อง"); }
+        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Start
         window.onload = initGame;
     </script>
 </body>
