@@ -22,7 +22,7 @@
         body {
             font-family: 'Prompt', sans-serif;
             background-color: #f4f6f9;
-            overflow-x: hidden;
+            overflow-x: hidden; /* ซ่อน Scrollbar แนวนอน */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -54,7 +54,6 @@
         .icon-blue { color: #0d6efd; }
 
         .odometer { font-size: 4.5rem; font-weight: 800; color: #333; line-height: 1; }
-        .watermark-icon { position: absolute; bottom: -20px; right: 10px; font-size: 10rem; opacity: 0.08; color: #000; z-index: 0; pointer-events: none; transform: rotate(-15deg); }
         .card-content { position: relative; z-index: 2; padding: 40px 20px; text-align: center; }
 
         /* --- Footer --- */
@@ -64,12 +63,12 @@
         .footer-divider { margin: 0 10px; opacity: 0.5; }
         .copyright-text { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; margin-top: 20px; font-size: 0.8rem; opacity: 0.9; }
 
-        /* --- HERO FOUND POPUP (แจ้งเตือนผู้บริจาคใหม่) --- */
+        /* --- HERO FOUND POPUP (FULL SCREEN OVERLAY) --- */
         .found-modal {
             display: none; /* ซ่อนไว้ก่อน */
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.95); /* พื้นหลังดำโปร่งแสง */
+            background-color: rgba(0,0,0,0.95); /* พื้นหลังดำทึบแสง */
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -79,7 +78,7 @@
         
         .found-icon-container { position: relative; margin-bottom: 20px; width: 100%; display: flex; justify-content: center; }
 
-        /* ไอคอนเหรียญทอง (ใช้กรณีไม่ถ่ายรูป) */
+        /* กรณีไม่มีรูป (ใช้ไอคอน) */
         .found-medal {
             font-size: 12rem;
             color: #ffd700;
@@ -87,10 +86,10 @@
             animation: pulse 1s infinite;
         }
 
-        /* รูปภาพผู้บริจาค (ใช้กรณีถ่ายรูป) */
+        /* กรณีมีรูปถ่าย */
         .hero-photo {
             max-width: 80%;
-            max-height: 60vh;
+            max-height: 60vh; /* สูงไม่เกิน 60% ของจอ */
             border-radius: 20px;
             border: 8px solid #ffd700;
             box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
@@ -98,9 +97,10 @@
             animation: zoomIn 0.5s;
         }
 
+        /* Banner ด้านบน */
         .found-title {
             color: #ff6b6b;
-            font-size: 6rem; /* ใหญ่พิเศษ */
+            font-size: 6rem;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 5px;
@@ -110,9 +110,9 @@
             font-family: 'Sarabun', sans-serif;
         }
 
-        /* ปรับขนาดตัวอักษรสำหรับชื่อ */
+        /* ชื่อด้านล่าง */
         .found-subtitle {
-            font-size: 4rem; /* ใหญ่ขึ้น */
+            font-size: 4rem;
             color: #ffffff;
             font-weight: bold;
             margin-top: 20px;
@@ -140,7 +140,7 @@
         }
         .dismiss-btn:hover { background: white; color: black; }
 
-        /* ปุ่มเปิดเสียง (เผื่อ Browser บล็อกเสียงอัตโนมัติ) */
+        /* ปุ่มเปิดเสียง (ซ่อนไว้มุมขวาล่าง) */
         .sound-toggle {
             position: fixed; bottom: 20px; right: 20px; 
             background: rgba(0,0,0,0.5); color: white; 
@@ -201,7 +201,6 @@
             <!-- Card 1: ผู้เข้าชม -->
             <div class="col-md-4">
                 <div class="stat-card border-top-teal">
-                    <i class="fa-solid fa-users watermark-icon"></i>
                     <div class="card-content">
                         <i class="fa-solid fa-users main-icon icon-teal"></i>
                         <div class="d-block mb-2">
@@ -215,7 +214,6 @@
             <!-- Card 2: บริจาคอวัยวะ -->
             <div class="col-md-4">
                 <div class="stat-card border-top-red">
-                    <i class="fa-solid fa-heart-pulse watermark-icon"></i>
                     <div class="card-content">
                         <i class="fa-solid fa-heart-pulse main-icon icon-red"></i>
                         <div class="d-block mb-2">
@@ -229,7 +227,6 @@
             <!-- Card 3: บริจาคดวงตา -->
             <div class="col-md-4">
                 <div class="stat-card border-top-blue">
-                    <i class="fa-solid fa-eye watermark-icon"></i>
                     <div class="card-content">
                         <i class="fa-solid fa-eye main-icon icon-blue"></i>
                         <div class="d-block mb-2">
@@ -244,20 +241,21 @@
 
     <!-- POPUP HERO FOUND (หน้าต่างแจ้งเตือนฮีโร่) -->
     <div id="heroFoundModal" class="found-modal animate__animated">
-        <!-- แสดงรูปภาพ (ถ้ามี) -->
+        
+        <!-- ส่วนรูปภาพ (แสดงเมื่อมีรูปส่งมา) -->
         <div class="found-icon-container" id="hero-image-wrapper" style="display:none;">
-            <img id="hero-image-el" class="hero-photo" src="" alt="Hero">
+            <img id="hero-image-el" class="hero-photo" src="" alt="Hero Photo">
         </div>
         
-        <!-- แสดงไอคอน (ถ้าไม่มีรูป) -->
+        <!-- ส่วนไอคอน (แสดงเมื่อไม่มีรูป) -->
         <div class="found-icon-container" id="hero-icon-wrapper">
             <i class="fa-solid fa-medal found-medal"></i>
         </div>
 
-        <!-- Banner ข้อความด้านบน -->
+        <!-- ข้อความ Banner ด้านบน -->
         <h1 class="found-title" id="hero-banner-el">HERO FOUND!</h1>
         
-        <!-- ชื่อผู้บริจาคด้านล่าง (ตัวใหญ่) -->
+        <!-- ชื่อผู้บริจาค ด้านล่าง (ตัวใหญ่) -->
         <h2 class="found-subtitle" id="hero-name-el">พบฮีโร่ผู้ให้คนใหม่</h2>
         
         <button class="dismiss-btn" onclick="closeFoundModal()">ปิดหน้าต่าง (Close)</button>
@@ -296,7 +294,7 @@
     <!-- Audio Element (เสียง Effect) -->
     <audio id="heroSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
 
-    <!-- ปุ่มเปิดเสียง (ซ่อนไว้กดเองเผื่อ browser block) -->
+    <!-- ปุ่มเปิดเสียง -->
     <button id="soundToggle" class="sound-toggle" onclick="enableSound()" title="เปิดเสียง">
         <i class="fa-solid fa-volume-xmark" id="soundIcon"></i>
     </button>
@@ -311,15 +309,15 @@
         // 1. ตั้งค่า Odometer
         window.odometerOptions = { auto: false, format: '(,ddd)', duration: 2000, theme: 'default' };
 
-        // 2. ลิงก์ Script Google Sheet
+        // 2. ลิงก์ Script Google Sheet (URL เดิมของคุณ)
         const API_URL = 'https://script.google.com/macros/s/AKfycbyjbm3yoBaly8pVeXKz1QTpieUe_KjjNWpatAgq_mx3jtkX7zs6vFKm8DXzBCkxNrJm/exec';
         
-        // 3. ตัวแปรเก็บค่าเก่า (ไว้เทียบเพื่อหาฮีโร่ใหม่)
+        // 3. ตัวแปร
         let lastHeroName = ""; // เก็บชื่อคนล่าสุดเพื่อกันซ้ำ
         let isFirstLoad = true;
         let soundEnabled = false;
 
-        // ฟังก์ชันเปิดเสียง (User Interaction Requirement)
+        // ฟังก์ชันเปิดเสียง (กดปุ่มลำโพงมุมขวาล่าง)
         function enableSound() {
             soundEnabled = !soundEnabled;
             const btn = document.getElementById('soundIcon');
@@ -327,7 +325,7 @@
             
             if(soundEnabled) {
                 btn.className = 'fa-solid fa-volume-high';
-                // ลองเล่นเสียงเบาๆ เพื่อปลดล็อค Browser Policy
+                // เล่นเสียงเบาๆ เพื่อปลดล็อค Browser Autoplay Policy
                 sound.volume = 0;
                 sound.play().then(() => {
                     sound.pause();
@@ -338,12 +336,12 @@
             }
         }
 
-        // 4. ฟังก์ชันดึงข้อมูล (เพิ่ม Cache Busting)
+        // 4. ฟังก์ชันดึงข้อมูล (เพิ่ม Cache Busting ด้วย ?t=...)
         async function fetchData() {
             const statusBadge = document.getElementById('api-status');
             
             try {
-                // *** สำคัญ: เพิ่ม ?t=... เพื่อแก้ปัญหารูปไม่โหลดทันที (Cache Busting) ***
+                // *** เพิ่ม ?t=... เพื่อแก้ปัญหารูปไม่โหลดทันที (Cache Busting) ***
                 const timestamp = new Date().getTime();
                 const response = await fetch(API_URL + "?t=" + timestamp);
                 
@@ -362,10 +360,10 @@
                 // ถ้ามีชื่อ Hero ส่งมา และ ไม่ซ้ำกับคนล่าสุดที่เพิ่งโชว์ไป
                 if (data.lastHeroName && data.lastHeroName !== lastHeroName) {
                     
-                    // อัปเดตตัวแปรล่าสุด
+                    // อัปเดตชื่อล่าสุด
                     lastHeroName = data.lastHeroName;
                     
-                    // เรียกใช้งาน Popup (ข้ามครั้งแรกตอนโหลดหน้าเว็บก็ได้ ถ้าไม่ต้องการให้เด้งตอนเปิดหน้าจอ)
+                    // เรียกใช้งาน Popup (ข้ามครั้งแรกตอนโหลดหน้าเว็บ เพื่อไม่ให้เด้งใส่หน้าทันที)
                     if (!isFirstLoad) {
                         triggerHeroFound(data);
                     }
@@ -389,13 +387,13 @@
             document.getElementById('hero-banner-el').innerText = data.lastHeroMessage || "HERO FOUND!";
             document.getElementById('hero-name-el').innerText = data.lastHeroName || "พบฮีโร่ใหม่";
 
-            // 5.2 จัดการรูปภาพ
+            // 5.2 จัดการการแสดงผล รูป vs ไอคอน
             const imgWrapper = document.getElementById('hero-image-wrapper');
             const iconWrapper = document.getElementById('hero-icon-wrapper');
             const imgEl = document.getElementById('hero-image-el');
 
             if (data.lastHeroImage) {
-                // ถ้ามีรูปถ่ายมา (Base64)
+                // ถ้ามีรูปถ่าย (Base64) ให้โชว์รูป
                 imgEl.src = "data:image/jpeg;base64," + data.lastHeroImage;
                 imgWrapper.style.display = 'flex';
                 iconWrapper.style.display = 'none';
@@ -405,27 +403,44 @@
                 iconWrapper.style.display = 'flex';
             }
 
-            // 5.3 แสดง Modal และ เอฟเฟค
+            // 5.3 แสดง Modal และ Effect
             modal.style.display = 'flex';
             modal.classList.add('animate__fadeIn'); 
 
-            // เล่นเสียง
-            if (soundEnabled || true) { 
+            // เล่นเสียง (ถ้าเปิดเสียงไว้)
+            if (soundEnabled || true) { // บังคับลองเล่นดู
                 sound.currentTime = 0;
                 sound.play().catch(e => console.log("Autoplay blocked"));
             }
 
-            // จุดพลุ
+            // จุดพลุ (Confetti)
             const duration = 5000;
             const end = Date.now() + duration;
 
             (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#ff6b6b', '#ffffff'] });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#20c997', '#0d6efd', '#ffffff'] });
-                if (Date.now() < end) requestAnimationFrame(frame);
+                // พลุซ้าย
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ffd700', '#ff6b6b', '#ffffff'] 
+                });
+                // พลุขวา
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#20c997', '#0d6efd', '#ffffff']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
             }());
 
-            // ตั้งเวลาปิดอัตโนมัติ
+            // ตั้งเวลาปิดอัตโนมัติ (10 วินาที)
             setTimeout(closeFoundModal, 10000);
         }
 
@@ -448,8 +463,9 @@
                 document.getElementById('current-time').innerText = now.toLocaleTimeString('th-TH');
             }, 1000);
 
-            // Fetch ข้อมูลทุก 3 วินาที
+            // Fetch ข้อมูลครั้งแรก
             fetchData(); 
+            // Fetch ซ้ำทุก 3 วินาที
             setInterval(fetchData, 3000); 
         });
     </script>
